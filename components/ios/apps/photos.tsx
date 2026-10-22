@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronLeft, Ellipsis, Heart, Info, Search, Share, Trash2 } from 'lucide-react'
-import { photo } from '@/lib/ios-data'
+import { photo, publicAssetPath } from '@/lib/ios-data'
 import { cn } from '@/lib/utils'
 import { AppScreen, GlassButton, ScrollArea } from '../primitives'
 
@@ -60,7 +60,7 @@ export function PhotosApp() {
           <GlassButton icon={Ellipsis} label="More" />
         </header>
         <div className="flex flex-1 items-center">
-          <img src={viewer.src || '/placeholder.svg'} alt="" className="w-full object-contain" />
+          <img src={viewer.src || publicAssetPath('/placeholder.svg')} alt="" className="w-full object-contain" />
         </div>
         <div className="flex items-center justify-between px-4 pb-10">
           <GlassButton icon={Share} label="Share" />
@@ -130,7 +130,7 @@ export function PhotosApp() {
             {shown.map((p) => (
               <li key={p.id} className="relative">
                 <button type="button" onClick={() => setViewer(p)} className="block w-full" aria-label={`Photo from ${MONTHS[p.month - 1]} ${p.day}, ${p.year}`}>
-                  <img src={p.src || '/placeholder.svg'} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+                  <img src={p.src || publicAssetPath('/placeholder.svg')} alt="" loading="lazy" className="aspect-square w-full object-cover" />
                 </button>
                 {favorites.has(p.id) && <Heart className="pointer-events-none absolute bottom-1 left-1 size-3.5 fill-white text-white" aria-hidden />}
               </li>
@@ -152,7 +152,7 @@ export function PhotosApp() {
                     }}
                     className="relative block w-full overflow-hidden rounded-[22px] text-left"
                   >
-                    <img src={p.src || '/placeholder.svg'} alt="" className="h-[210px] w-full object-cover" />
+                    <img src={p.src || publicAssetPath('/placeholder.svg')} alt="" className="h-[210px] w-full object-cover" />
                     <span className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-transparent" />
                     <span className="absolute top-3 left-4">
                       <span className="block text-[22px] font-bold">{MONTHS[p.month - 1]}</span>
@@ -185,7 +185,7 @@ export function PhotosApp() {
                     }}
                     className="relative block w-full overflow-hidden rounded-[26px] text-left"
                   >
-                    <img src={cover.src || '/placeholder.svg'} alt="" className="h-[280px] w-full object-cover" />
+                    <img src={cover.src || publicAssetPath('/placeholder.svg')} alt="" className="h-[280px] w-full object-cover" />
                     <span className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/30" />
                     <span className="absolute top-4 left-5">
                       <span className="block text-[34px] font-bold">{y}</span>

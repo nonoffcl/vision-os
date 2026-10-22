@@ -15,7 +15,7 @@ const GRID: AppId[] = [
   'twitch',
   'youtube',
   'clock',
-  'photos',
+  'camera',
   'notes',
   'settings',
 ]
@@ -26,7 +26,7 @@ export function HomeScreen() {
   const { openApp } = usePhone()
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <img src="/images/wallpaper.png" alt="" className="absolute inset-0 size-full object-cover" />
+      <img src="https://i.pinimg.com/736x/c8/35/41/c835418c90f432b20ddad3dd34db4bc2.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-0 bg-black/15" />
 
       <div className="relative flex h-full flex-col px-[26px] pt-[70px]">
@@ -65,8 +65,9 @@ function IconButton({ id, onOpen, hideLabel }: { id: AppId; onOpen: (id: AppId) 
   return (
     <button
       type="button"
+      disabled={id === 'letterboxd' || id === 'coupang' || id === 'discord'}
       onClick={() => onOpen(id)}
-      className="flex w-[74px] flex-col items-center gap-1.5 transition active:scale-90 active:brightness-75"
+      className="flex w-[74px] flex-col items-center gap-1.5 transition active:scale-90 active:brightness-75 disabled:cursor-not-allowed"
       aria-label={badge ? `${APP_LABELS[id]}, ${badge} notifications` : APP_LABELS[id]}
     >
       <span className="relative">

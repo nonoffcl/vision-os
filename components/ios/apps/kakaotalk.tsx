@@ -29,9 +29,9 @@ import {
   Ellipsis,
   Smartphone,
 } from 'lucide-react'
-import { photo, USER } from '@/lib/ios-data'
+import { photo, publicAssetPath, USER } from '@/lib/ios-data'
 import { cn } from '@/lib/utils'
-import { AppScreen, Avatar, BackButton, GlassButton, GlassTabBar, ScrollArea, type Tab } from '../primitives'
+import { AppScreen, Avatar, GlassButton, ScrollArea } from '../primitives'
 
 type Friend = { id: string; name: string; status?: string; music?: string; img?: string; bg: string; favorite?: boolean }
 type Msg = { id: string; from: string; text: string; time: string }
@@ -167,18 +167,9 @@ const INITIAL_CHATS: Chat[] = [
 
 const REPLIES = ['ㅋㅋㅋㅋㅋ', 'omg yes', 'wait really?', 'okok 👍', 'hahaha', 'I’m on my way!', 'love that 💛', 'ㅇㅋ']
 
-type TabId = 'friends' | 'chats' | 'openchat' | 'more'
-const TABS: Tab<TabId>[] = [
-  { id: 'friends', label: 'Friends', icon: User },
-  { id: 'chats', label: 'Chats', icon: MessageCircle },
-  { id: 'openchat', label: 'Open Chat', icon: MessagesSquare },
-  { id: 'more', label: 'More', icon: Ellipsis },
-]
-
 type View = { type: 'tabs' } | { type: 'profile'; id: string } | { type: 'chat'; id: string }
 
 export function KakaoTalkApp() {
-  const [tab, setTab] = useState<TabId>('chats')
   const [view, setView] = useState<View>({ type: 'tabs' })
   const [chats, setChats] = useState<Chat[]>(INITIAL_CHATS)
 
@@ -231,20 +222,9 @@ export function KakaoTalkApp() {
     )
   }
 
-  const totalUnread = chats.reduce((s, c) => s + (c.muted ? 0 : c.unread), 0)
-
   return (
-    <AppScreen bg="#111">
-      {tab === 'friends' && <FriendsTab onProfile={(id) => setView({ type: 'profile', id })} />}
-      {tab === 'chats' && <ChatsTab chats={chats} onOpen={openChat} />}
-      {tab === 'openchat' && <OpenChatTab />}
-      {tab === 'more' && <MoreTab onProfile={() => setView({ type: 'profile', id: 'me' })} />}
-      <GlassTabBar
-        tabs={TABS.map((t) => (t.id === 'chats' && totalUnread ? { ...t, label: `Chats · ${totalUnread}` } : t))}
-        active={tab}
-        onChange={setTab}
-        accent="#FEE500"
-      />
+    <AppScreen bg="#F7F7F7" className="text-[#222222]">
+      <ChatsTab chats={chats} onOpen={openChat} />
     </AppScreen>
   )
 }
@@ -359,60 +339,36 @@ const chatTitle = (c: Chat) =>
   c.name ?? (c.kind === 'self' ? `${USER.firstName} (Me)` : c.members.map((id) => findFriend(id).name).join(', '))
 
 function ChatsTab({ chats, onOpen }: { chats: Chat[]; onOpen: (id: string) => void }) {
-  const [filter, setFilter] = useState<'all' | 'unread' | 'group' | 'channel'>('all')
-  const visible = chats
-    .filter((c) => {
-      if (filter === 'unread') return c.unread > 0
-      if (filter === 'group') return c.kind === 'group'
-      if (filter === 'channel') return c.kind === 'channel'
-      return true
-    })
-    .sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned))
+  const visible = [...chats].sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned))
 
   return (
-    <ScrollArea className="pb-28">
-      <TabHeader title="Chats" icons={[Search, Plus, Settings]} />
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-5 pb-3">
-        {(
-          [
-            ['all', 'All'],
-            ['unread', 'Unread'],
-            ['group', 'Groups'],
-            ['channel', 'Channels'],
-          ] as const
-        ).map(([id, l]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setFilter(id)}
-            className={cn(
-              'shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium',
-              filter === id ? 'bg-white text-black' : 'bg-white/10 text-white/80',
-            )}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
+    <ScrollArea>
+      <header className="flex items-center justify-between px-5 pt-[62px] pb-4">
+        <h1 className="text-[24px] font-bold">Chats</h1>
+        <span className="flex items-center gap-5 text-[#333333]">
+          <Search className="size-[21px]" aria-hidden />
+          <Pencil className="size-[21px]" aria-hidden />
+        </span>
+      </header>
       <ul>
         {visible.map((c) => {
           const last = c.messages.at(-1)
           return (
-            <li key={c.id}>
-              <button type="button" onClick={() => onOpen(c.id)} className="flex w-full items-center gap-3 px-5 py-2.5 text-left active:bg-white/5">
+            <li key={c.id} className="border-b border-black/[0.05]">
+              <button type="button" onClick={() => onOpen(c.id)} className="flex w-full items-center gap-3 px-5 py-3 text-left active:bg-black/5">
                 <ChatAvatar chat={c} />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1.5">
-                    <span className="truncate text-[15px] font-semibold">{chatTitle(c)}</span>
-                    {c.kind === 'group' && <span className="text-[14px] text-white/40">{c.members.length + 1}</span>}
-                    {c.muted && <Bell className="size-3 text-white/40 line-through" aria-label="Muted" />}
+                    <span className="truncate text-[15px] font-semibold text-[#222222]">{chatTitle(c)}</span>
+                    {c.kind === 'group' && <span className="text-[14px] text-[#8E8E93]">{c.members.length + 1}</span>}
+                    {c.muted && <Bell className="size-3 text-[#8E8E93] line-through" aria-label="Muted" />}
                   </span>
-                  <span className="line-clamp-1 text-[13px] text-white/55">{last?.text ?? 'Start a conversation'}</span>
+                  <span className="line-clamp-1 text-[13px] text-[#8E8E93]">{last?.text ?? 'Start a conversation'}</span>
                 </span>
                 <span className="flex flex-col items-end gap-1.5 self-start pt-0.5">
-                  <span className="text-[11px] text-white/40">{last?.time}</span>
+                  <span className="text-[11px] text-[#8E8E93]">{last?.time}</span>
                   {c.unread > 0 && (
-                    <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FF5A3C] px-1.5 text-[11px] font-semibold">
+                    <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FEE500] px-1.5 text-[11px] font-semibold text-black">
                       {c.unread > 99 ? '99+' : c.unread}
                     </span>
                   )}
@@ -451,22 +407,21 @@ function ChatRoom({
   }
 
   return (
-    <AppScreen bg="#1B2836">
-      <header className="absolute inset-x-0 top-0 z-20 flex items-center gap-2 bg-gradient-to-b from-[#1B2836] via-[#1B2836]/90 to-transparent px-3 pt-[56px] pb-4">
-        <BackButton onClick={onBack} />
-        <div className="glass min-w-0 flex-1 rounded-full px-4 py-1.5 text-center">
-          <p className="truncate text-[15px] font-semibold">{chatTitle(chat)}</p>
-          {chat.kind === 'group' && <p className="text-[11px] text-white/55">{chat.members.length + 1} members</p>}
+    <AppScreen bg="#B4C9DA" className="text-black">
+      <header className="absolute inset-x-0 top-0 z-20 flex items-center gap-1 bg-[#B4C9DA] px-3 pt-[56px] pb-3">
+        <button type="button" onClick={onBack} aria-label="Back to chats" className="flex h-10 items-center gap-1 text-black">
+          <ChevronRight className="size-6 rotate-180" />
+          <span className="text-[16px]">12</span>
+        </button>
+        <div className="min-w-0 flex-1 text-center">
+          <p className="truncate text-[17px] font-semibold">{chatTitle(chat)}</p>
         </div>
-        <GlassButton icon={Search} label="Search chat" />
-        <GlassButton icon={Menu} label="Chat menu" />
+        <Search className="mx-2 size-6 text-black" aria-hidden />
+        <Menu className="size-6 text-black" aria-hidden />
       </header>
 
-      <ScrollArea className="px-3 pt-[120px] pb-3">
-        <p className="mx-auto mb-4 w-fit rounded-full bg-black/25 px-3 py-1 text-[11px] text-white/70">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-        </p>
-        <ul className="flex flex-col gap-1.5">
+      <ScrollArea className="bg-[#B4C9DA] px-3 pt-[112px] pb-3">
+        <ul className="flex flex-col gap-2">
           {chat.messages.map((msg, i) => {
             const prev = chat.messages[i - 1]
             const next = chat.messages[i + 1]
@@ -478,36 +433,36 @@ function ChatRoom({
 
             if (mine) {
               return (
-                <li key={msg.id} className={cn('flex items-end justify-end gap-1.5', firstOfRun && 'mt-2')}>
-                  <span className="flex flex-col items-end text-[10px] leading-tight">
-                    {isLastMine && <span className="font-semibold text-[#FEE500]">1</span>}
-                    {lastOfRun && <span className="text-white/45">{msg.time}</span>}
+                <li key={msg.id} className={cn('flex items-end justify-end gap-1.5', firstOfRun && 'mt-1')}>
+                  <span className="flex flex-col items-end text-[11px] leading-tight text-[#60798A]">
+                    {isLastMine && <span className="font-semibold">1</span>}
+                    {lastOfRun && <span>{msg.time}</span>}
                   </span>
-                  <p className="max-w-[72%] rounded-[16px] rounded-tr-[4px] bg-[#FEE500] px-3 py-2 text-[15px] whitespace-pre-line text-black">
+                  <p className="max-w-[78%] rounded-[19px] bg-[#FEE500] px-3.5 py-2.5 text-[16px] leading-[1.35] whitespace-pre-line text-black">
                     {msg.text}
                   </p>
                 </li>
               )
             }
             return (
-              <li key={msg.id} className={cn('flex gap-2', firstOfRun && 'mt-2')}>
-                <span className="w-10 shrink-0">
+              <li key={msg.id} className={cn('flex gap-1.5', firstOfRun && 'mt-1')}>
+                <span className="w-12 shrink-0">
                   {firstOfRun &&
                     (sender ? (
                       <button type="button" onClick={() => onProfile(sender.id)} aria-label={`View ${sender.name}'s profile`}>
-                        <Avatar name={sender.name} src={sender.img} size={40} rounded="squircle" />
+                        <Avatar name={sender.name} src={sender.img} size={48} rounded="squircle" />
                       </button>
                     ) : (
-                      <ChatAvatar chat={chat} size={40} />
+                      <ChatAvatar chat={chat} size={48} />
                     ))}
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  {firstOfRun && <span className="mb-1 text-[12px] text-white/70">{sender?.name ?? chat.name}</span>}
+                  {firstOfRun && <span className="mb-1 text-[13px] text-[#60798A]">{sender?.name ?? chat.name}</span>}
                   <span className="flex items-end gap-1.5">
-                    <p className="max-w-[230px] rounded-[16px] rounded-tl-[4px] bg-[#3A3F47] px-3 py-2 text-[15px] whitespace-pre-line">
+                    <p className="max-w-[250px] rounded-[19px] bg-white px-3.5 py-2.5 text-[16px] leading-[1.35] whitespace-pre-line text-black">
                       {msg.text}
                     </p>
-                    {lastOfRun && <span className="shrink-0 text-[10px] text-white/45">{msg.time}</span>}
+                    {lastOfRun && <span className="shrink-0 text-[11px] text-[#60798A]">{msg.time}</span>}
                   </span>
                 </span>
               </li>
@@ -522,10 +477,12 @@ function ChatRoom({
           e.preventDefault()
           submit()
         }}
-        className="flex items-center gap-2 px-3 pt-2 pb-9"
+        className="flex items-center gap-2 bg-white px-3 pt-2 pb-9"
       >
-        <GlassButton icon={Plus} label="Attach" />
-        <div className="glass flex min-w-0 flex-1 items-center rounded-full pr-1 pl-4">
+        <button type="button" aria-label="Add attachment" className="flex size-10 items-center justify-center text-[#424242]">
+          <Plus className="size-5" />
+        </button>
+        <div className="flex min-w-0 flex-1 items-center rounded-full bg-[#F2F2F2] pr-1 pl-4">
           <label htmlFor="kakao-input" className="sr-only">
             Message
           </label>
@@ -537,14 +494,14 @@ function ChatRoom({
               if (e.key === 'Enter' && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault()
             }}
             placeholder="Message"
-            className="h-11 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-white/45"
+            className="h-11 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-[#AAAAAA]"
           />
           {text.trim() ? (
             <button type="submit" aria-label="Send" className="flex size-9 items-center justify-center rounded-full bg-[#FEE500] text-black">
               <Send className="size-4" />
             </button>
           ) : (
-            <Smile className="mr-2 size-6 text-white/70" aria-hidden />
+            <Smile className="mr-2 size-6 text-[#424242]" aria-hidden />
           )}
         </div>
       </form>
@@ -567,7 +524,7 @@ function ProfileView({ friend, onClose, onChat }: { friend: Friend; onClose: () 
       ]
   return (
     <AppScreen className="animate-in fade-in slide-in-from-bottom-8 duration-300">
-      <img src={friend.bg || '/placeholder.svg'} alt="" className="absolute inset-0 size-full object-cover" />
+      <img src={friend.bg || publicAssetPath('/placeholder.svg')} alt="" className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/85" />
       <header className="relative flex items-center justify-between px-4 pt-[58px]">
         <GlassButton icon={X} label="Close profile" onClick={onClose} />
@@ -614,7 +571,7 @@ function OpenChatTab() {
     <ScrollArea className="pb-28">
       <TabHeader title="Open Chat" icons={[Search, Plus]} />
       <div className="mx-5 mb-4 overflow-hidden rounded-2xl">
-        <img src={photo(3) || '/placeholder.svg'} alt="" className="h-32 w-full object-cover" />
+        <img src={photo(3) || publicAssetPath('/placeholder.svg')} alt="" className="h-32 w-full object-cover" />
         <div className="bg-white/[0.06] p-3">
           <p className="text-[15px] font-semibold">Trending now</p>
           <p className="text-[12px] text-white/55">Join live conversations about concerts this weekend</p>
@@ -624,7 +581,7 @@ function OpenChatTab() {
       <ul>
         {rooms.map(([name, sub, p]) => (
           <li key={name} className="flex items-center gap-3 px-5 py-2.5">
-            <img src={photo(p) || '/placeholder.svg'} alt="" className="size-[50px] rounded-[38%] object-cover" />
+            <img src={photo(p) || publicAssetPath('/placeholder.svg')} alt="" className="size-[50px] rounded-[38%] object-cover" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[15px] font-semibold">{name}</span>
               <span className="block truncate text-[13px] text-white/55">{sub}</span>

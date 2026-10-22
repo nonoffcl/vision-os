@@ -1,5 +1,4 @@
-import { Compass, MessageCircle, Phone, Settings } from 'lucide-react'
-import type { AppId } from '@/lib/ios-data'
+import { publicAssetPath, type AppId } from '@/lib/ios-data'
 
 export const APP_LABELS: Record<AppId, string> = {
   bereal: 'BeReal.',
@@ -11,6 +10,7 @@ export const APP_LABELS: Record<AppId, string> = {
   youtube: 'YouTube',
   clock: 'Clock',
   notes: 'Notes',
+  camera: 'Camera',
   photos: 'Photos',
   settings: 'Settings',
   phone: 'Phone',
@@ -44,9 +44,9 @@ function Mask({ src, color, size = '62%' }: { src: string; color: string; size?:
 function Glyph({ id }: { id: AppId }) {
   switch (id) {
     case 'bereal':
-      return <Mask src="/icons/bereal.svg" color="#fff" size="78%" />
+      return <Mask src={publicAssetPath('/icons/bereal.svg')} color="#fff" size="78%" />
     case 'instagram':
-      return <Mask src="/icons/instagram.svg" color="#fff" />
+      return <img src="https://play-lh.googleusercontent.com/yHi59jmO_lVamcyJ1i3rM1_E8bAiAspShnGjjURq05ipQQSUksO3QVEsXTegRSqul038-4YNA7O644XAcx251Q" alt="" className="size-full object-cover" />
     case 'letterboxd':
       return (
         <span className="flex items-center -space-x-1.5" aria-hidden>
@@ -56,33 +56,23 @@ function Glyph({ id }: { id: AppId }) {
         </span>
       )
     case 'coupang':
-      return (
-        <span className="flex flex-col items-center leading-none" aria-hidden>
-          <span className="text-[0.62em] font-black tracking-tight text-white">eats</span>
-          <span className="mt-0.5 h-[3px] w-[60%] rounded-full bg-white/80" />
-        </span>
-      )
+      return <img src="https://play-lh.googleusercontent.com/CBkhhaayZnh_KbjEcNjUwicICY8BPhzkpM_FTEinbFTPuE8L4ptnYBNCKjbTw6f34KSgvKyhI99BclOkhy0R" alt="" className="size-full object-cover" />
     case 'discord':
-      return <Mask src="/icons/discord.svg" color="#fff" />
+      return <Mask src={publicAssetPath('/icons/discord.svg')} color="#fff" />
     case 'twitch':
-      return <Mask src="/icons/twitch.svg" color="#fff" size="55%" />
+      return <Mask src={publicAssetPath('/icons/twitch.svg')} color="#fff" size="55%" />
     case 'youtube':
-      return <Mask src="/icons/youtube.svg" color="#FF0033" size="66%" />
+      return <Mask src={publicAssetPath('/icons/youtube.svg')} color="#FF0033" size="66%" />
     case 'spotify':
-      return <Mask src="/icons/spotify.svg" color="#1ED760" size="66%" />
+      return <Mask src={publicAssetPath('/icons/spotify.svg')} color="#1ED760" size="66%" />
     case 'safari':
-      return <Compass aria-hidden className="size-[70%] text-white" strokeWidth={1.4} />
+      return <img src="https://ipcdn-web.apple.com/assets/v2/web/c6d93db1-d714-47ae-a19b-0ffd7095280e" alt="" className="size-full object-cover" />
     case 'phone':
-      return <Phone aria-hidden className="size-[52%] fill-white text-white" strokeWidth={0} />
+      return <img src="https://help.apple.com/assets/69022D37F8883CCD0800AD11/69022D39A66C612A5405F6B8/en_US/abf196bfb9b2a65bd64ed7ad0bfdb333.png" alt="" className="size-full object-cover" />
     case 'settings':
-      return <Settings aria-hidden className="size-[72%] text-[#3a3a3c]" strokeWidth={1.6} />
+      return <img src="https://cdn.iconscout.com/icon/free/png-256/free-apple-settings-icon-svg-download-png-493162.png?f=webp" alt="" className="size-full object-cover" />
     case 'kakaotalk':
-      return (
-        <span className="relative flex size-full items-center justify-center" aria-hidden>
-          <MessageCircle className="size-[74%] fill-[#3A1D1D] text-[#3A1D1D]" strokeWidth={0} />
-          <span className="absolute text-[0.24em] font-black tracking-tight text-[#FEE500]">TALK</span>
-        </span>
-      )
+      return <img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/KakaoTalk_logo.svg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="" className="size-full object-contain p-1" />
     case 'clock':
       return (
         <span className="relative block size-[84%] rounded-full bg-white" aria-hidden>
@@ -102,14 +92,15 @@ function Glyph({ id }: { id: AppId }) {
         </span>
       )
     case 'notes':
+      return <img src="https://play-lh.googleusercontent.com/c38n8qhzFrfe621ksvaatXnrciFwwipWOrdMrfrujdqZo5OSLHfeakicVrDMNj5YdJBnJVQ84QXTHaOuQccz" alt="" className="size-full object-cover" />
+    case 'camera':
       return (
-        <span className="flex size-full flex-col" aria-hidden>
-          <span className="h-[26%] bg-gradient-to-b from-[#FFD52E] to-[#F8C100]" />
-          <span className="flex flex-1 flex-col justify-evenly bg-[#F5F5F7] px-[12%] pb-[10%]">
-            {[0, 1, 2, 3].map((i) => (
-              <span key={i} className="h-px bg-[#c7c7cc]" />
-            ))}
-          </span>
+        <span className="block size-full bg-[#D2D3D5]">
+          <img
+            src="https://i.redd.it/0cp237gqve3h1.png"
+            alt=""
+            className="size-full rounded-[24%] bg-[#D2D3D5] object-cover opacity-100"
+          />
         </span>
       )
     case 'photos':
@@ -131,7 +122,7 @@ const BG: Record<AppId, string> = {
   bereal: '#000',
   instagram: 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)',
   letterboxd: '#14181C',
-  coupang: 'linear-gradient(160deg, #3DD4F5, #00A9E8)',
+  coupang: '#FFFFFF',
   discord: '#5865F2',
   twitch: '#9146FF',
   youtube: '#fff',
@@ -142,6 +133,7 @@ const BG: Record<AppId, string> = {
   kakaotalk: '#FEE500',
   clock: '#000',
   notes: '#fff',
+  camera: '#D2D3D5',
   photos: '#fff',
 }
 

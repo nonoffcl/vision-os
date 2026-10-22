@@ -1,94 +1,94 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, Hash, Plus, Search, Send, Volume2 } from 'lucide-react'
+import { ChevronLeft, Search, Send } from 'lucide-react'
 import { photo, USER } from '@/lib/ios-data'
-import { cn } from '@/lib/utils'
 import { AppScreen, Avatar, ScrollArea } from '../primitives'
 
-const SERVERS = [
-  { id: 'movie', name: 'Movie Club', img: photo(3) },
-  { id: 'uni', name: '22학번 CS', img: photo(7) },
-  { id: 'valo', name: 'Valorant KR', img: photo(0) },
-  { id: 'art', name: 'Film Photo', img: photo(6) },
-]
+type Message = { user: string; text: string; time: string }
+type Chat = { id: string; name: string; avatar: string; preview: string; messages: Message[] }
 
-const CHANNELS: Record<string, { text: string[]; voice: string[] }> = {
-  movie: { text: ['general', 'recommendations', 'spoilers', 'friday-watch'], voice: ['Watch Party', 'Lounge'] },
-  uni: { text: ['announcements', 'homework-help', 'memes', 'study-group'], voice: ['Study Room 1', 'Study Room 2'] },
-  valo: { text: ['general', 'lfg', 'clips'], voice: ['Squad 1', 'Squad 2'] },
-  art: { text: ['general', 'film-stocks', 'show-your-work'], voice: ['Darkroom'] },
-}
-
-type Msg = { user: string; text: string; time: string }
-
-const SEED: Msg[] = [
-  { user: 'dohyun', text: 'friday watch list is up, vote in #friday-watch', time: 'Today at 5:02 PM' },
-  { user: 'haneul', text: 'can we pls not do horror again 😭', time: 'Today at 5:10 PM' },
-  { user: 'jisoo', text: 'its my birthday week, horror it is 😈', time: 'Today at 5:11 PM' },
-  { user: 'yuna', text: 'i’ll bring snacks at least', time: 'Today at 5:15 PM' },
+const CHATS: Chat[] = [
+  {
+    id: 'jisoo',
+    name: 'Jisoo Kim',
+    avatar: photo(0),
+    preview: 'are we still on for tonight??',
+    messages: [
+      { user: 'Jisoo', text: 'hey! are we still on for tonight??', time: '6:41 PM' },
+      { user: 'me', text: 'yes, see you at 8 🍿', time: '6:43 PM' },
+    ],
+  },
+  {
+    id: 'movie-club',
+    name: 'Movie Club',
+    avatar: photo(3),
+    preview: 'I’ll bring snacks at least',
+    messages: [
+      { user: 'Dohyun', text: 'ok what are we watching friday', time: '5:10 PM' },
+      { user: 'Haneul', text: 'something scary pls 👻', time: '5:12 PM' },
+      { user: 'Yuna', text: 'no 😭 last time i couldnt sleep', time: '5:15 PM' },
+      { user: 'me', text: 'I’ll bring snacks at least', time: '5:18 PM' },
+    ],
+  },
 ]
 
 export function DiscordApp() {
-  const [server, setServer] = useState('movie')
-  const [channel, setChannel] = useState<string | null>(null)
-  const [msgs, setMsgs] = useState<Msg[]>(SEED)
+  const [chatId, setChatId] = useState<string | null>(null)
+  const [messages, setMessages] = useState<Record<string, Message[]>>(() => Object.fromEntries(CHATS.map((chat) => [chat.id, chat.messages])))
   const [text, setText] = useState('')
-  const s = SERVERS.find((x) => x.id === server)!
+  const chat = CHATS.find((item) => item.id === chatId)
 
-  if (channel) {
+  if (chat) {
     return (
-      <AppScreen bg="#1A1A1E">
-        <header className="flex items-center gap-2 border-b border-white/10 px-3 pt-[58px] pb-3">
-          <button type="button" onClick={() => setChannel(null)} aria-label="Back to channels">
+      <AppScreen bg="#313338">
+        <header className="flex items-center gap-3 border-b border-black/10 px-4 pt-[58px] pb-3">
+          <button type="button" onClick={() => setChatId(null)} aria-label="Back to chats">
             <ChevronLeft className="size-7" />
           </button>
-          <Hash className="size-5 text-white/50" aria-hidden />
-          <span className="text-[17px] font-semibold">{channel}</span>
+          <Avatar name={chat.name} src={chat.avatar} size={34} rounded="squircle" />
+          <span className="text-[17px] font-semibold">{chat.name}</span>
           <Search className="ml-auto size-5 text-white/70" aria-hidden />
         </header>
-        <ScrollArea className="px-4 py-3">
-          <p className="pb-4 text-[24px] font-bold">Welcome to #{channel}!</p>
+        <ScrollArea className="px-4 py-4">
           <ul className="flex flex-col gap-4">
-            {msgs.map((m, i) => (
-              <li key={i} className="flex gap-3">
-                <Avatar name={m.user} size={40} src={m.user === USER.firstName ? photo(4) : undefined} />
-                <div className="min-w-0">
-                  <p className="text-[15px] font-semibold">
-                    {m.user} <span className="text-[11px] font-normal text-white/40">{m.time}</span>
-                  </p>
-                  <p className="text-[15px] text-white/85">{m.text}</p>
-                </div>
-              </li>
-            ))}
+            {messages[chat.id].map((message, index) => {
+              const mine = message.user === 'me'
+              return (
+                <li key={`${message.time}-${index}`} className={`flex items-start gap-3 ${mine ? 'flex-row-reverse' : ''}`}>
+                  {!mine && <Avatar name={message.user} size={34} />}
+                  <div className={`max-w-[80%] ${mine ? 'text-right' : ''}`}>
+                    {!mine && <p className="mb-1 text-[12px] font-semibold text-white/60">{message.user}</p>}
+                    <p className={`rounded-2xl px-3 py-2 text-left text-[14px] ${mine ? 'bg-[#5865F2] text-white' : 'bg-[#232428] text-white/90'}`}>{message.text}</p>
+                    <p className="mt-1 text-[10px] text-white/40">{message.time}</p>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         </ScrollArea>
         <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (!text.trim()) return
-            setMsgs((ms) => [...ms, { user: USER.firstName, text: text.trim(), time: 'Just now' }])
+          onSubmit={(event) => {
+            event.preventDefault()
+            const value = text.trim()
+            if (!value) return
+            setMessages((current) => ({
+              ...current,
+              [chat.id]: [...current[chat.id], { user: 'me', text: value, time: 'Now' }],
+            }))
             setText('')
           }}
           className="flex items-center gap-2 px-3 pt-2 pb-9"
         >
-          <span className="flex size-10 items-center justify-center rounded-full bg-white/10">
-            <Plus className="size-5" aria-hidden />
-          </span>
-          <label htmlFor="discord-input" className="sr-only">
-            Message #{channel}
-          </label>
+          <label htmlFor="discord-message" className="sr-only">Message {chat.name}</label>
           <input
-            id="discord-input"
+            id="discord-message"
             value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault()
-            }}
-            placeholder={`Message #${channel}`}
-            className="h-10 min-w-0 flex-1 rounded-full bg-white/10 px-4 text-[15px] outline-none placeholder:text-white/40"
+            onChange={(event) => setText(event.target.value)}
+            placeholder={`Message ${chat.name}`}
+            className="h-11 min-w-0 flex-1 rounded-full bg-[#383A40] px-4 text-[15px] outline-none placeholder:text-white/45"
           />
-          <button type="submit" aria-label="Send" className="flex size-10 items-center justify-center rounded-full bg-[#5865F2]">
+          <button type="submit" aria-label="Send message" className="flex size-10 items-center justify-center rounded-full bg-[#5865F2]">
             <Send className="size-4" />
           </button>
         </form>
@@ -97,70 +97,30 @@ export function DiscordApp() {
   }
 
   return (
-    <AppScreen bg="#121214">
-      <div className="flex flex-1 overflow-hidden pt-[54px]">
-        <nav aria-label="Servers" className="no-scrollbar flex w-[72px] flex-col items-center gap-2 overflow-y-auto py-2">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-[#5865F2]">
-            <span
-              aria-hidden
-              className="size-7"
-              style={{ background: '#fff', WebkitMaskImage: 'url(/icons/discord.svg)', maskImage: 'url(/icons/discord.svg)', WebkitMaskSize: 'contain', maskSize: 'contain' }}
-            />
-          </span>
-          <span className="h-px w-8 bg-white/15" />
-          {SERVERS.map((sv) => (
-            <button key={sv.id} type="button" onClick={() => setServer(sv.id)} aria-label={sv.name} className="relative">
-              {server === sv.id && <span className="absolute top-1/2 -left-3 h-9 w-1 -translate-y-1/2 rounded-r bg-white" />}
-              <img
-                src={sv.img || '/placeholder.svg'}
-                alt=""
-                className={cn('size-12 object-cover transition-all', server === sv.id ? 'rounded-2xl' : 'rounded-full')}
-              />
-            </button>
-          ))}
-          <span className="flex size-12 items-center justify-center rounded-full bg-white/10 text-[#23A55A]">
-            <Plus className="size-6" aria-hidden />
-          </span>
-        </nav>
-        <div className="no-scrollbar flex-1 overflow-y-auto rounded-tl-2xl bg-[#1A1A1E] pb-10">
-          <div className="relative">
-            <img src={s.img || '/placeholder.svg'} alt="" className="h-24 w-full rounded-tl-2xl object-cover opacity-70" />
-            <h1 className="absolute bottom-2 left-4 text-[20px] font-bold drop-shadow">{s.name}</h1>
-          </div>
-          <div className="mx-3 mt-3 flex items-center gap-2 rounded-full bg-black/30 px-3 py-2 text-[14px] text-white/45">
-            <Search className="size-4" aria-hidden />
-            Search
-          </div>
-          <p className="px-4 pt-4 pb-1 text-[12px] font-semibold text-white/45 uppercase">Text Channels</p>
-          <ul>
-            {CHANNELS[server].text.map((c) => (
-              <li key={c}>
-                <button type="button" onClick={() => setChannel(c)} className="flex w-full items-center gap-2 px-4 py-2 text-left text-[16px] text-white/75 active:bg-white/5">
-                  <Hash className="size-5 text-white/45" aria-hidden />
-                  {c}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <p className="px-4 pt-4 pb-1 text-[12px] font-semibold text-white/45 uppercase">Voice Channels</p>
-          <ul>
-            {CHANNELS[server].voice.map((c, i) => (
-              <li key={c} className="px-4 py-2">
-                <span className="flex items-center gap-2 text-[16px] text-white/75">
-                  <Volume2 className="size-5 text-white/45" aria-hidden />
-                  {c}
+    <AppScreen bg="#2B2D31">
+      <header className="flex items-center justify-between px-5 pt-[62px] pb-4">
+        <h1 className="text-[22px] font-bold">Messages</h1>
+        <Search className="size-5 text-white/70" aria-hidden />
+      </header>
+      <ScrollArea>
+        <ul>
+          {CHATS.map((item, index) => (
+            <li key={item.id}>
+              <button type="button" onClick={() => setChatId(item.id)} className="flex w-full items-center gap-3 px-5 py-3 text-left active:bg-white/5">
+                <span className="relative">
+                  <Avatar name={item.name} src={item.avatar} size={52} rounded="squircle" />
+                  {index === 0 && <span className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-[#2B2D31] bg-[#23A55A]" />}
                 </span>
-                {i === 0 && (
-                  <span className="mt-1.5 ml-7 flex items-center gap-2 text-[13px] text-white/60">
-                    <Avatar name="jisoo" size={20} /> jisoo
-                    <Avatar name="dohyun" size={20} /> dohyun
-                  </span>
-                )}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px] font-semibold">{item.name}</span>
+                  <span className="block truncate text-[13px] text-white/55">{item.preview}</span>
+                </span>
+                <span className="size-2 rounded-full bg-[#5865F2]" aria-label="Unread" />
+              </button>
               </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+          ))}
+        </ul>
+      </ScrollArea>
     </AppScreen>
   )
 }
