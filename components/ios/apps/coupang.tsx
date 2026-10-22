@@ -1,5 +1,5 @@
 import { Bike, ChevronDown, Coffee, Drumstick, Fish, Heart, Home, Pizza, Receipt, Sandwich, Search, Soup, Star, User, UtensilsCrossed } from 'lucide-react'
-import { photo } from '@/lib/ios-data'
+import { photo, publicAssetPath } from '@/lib/ios-data'
 import { AppScreen, ScrollArea } from '../primitives'
 
 const CATEGORIES = [
@@ -48,7 +48,7 @@ export function CoupangApp() {
         </ul>
 
         <div className="relative mx-4 mt-5 overflow-hidden rounded-2xl">
-          <img src={photo(5) || '/placeholder.svg'} alt="Fried chicken and tteokbokki" className="h-36 w-full object-cover" />
+          <img src={photo(5) || publicAssetPath('/placeholder.svg')} alt="Fried chicken and tteokbokki" className="h-36 w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 to-transparent" />
           <div className="absolute top-4 left-4">
             <p className="text-[12px] font-semibold text-[#3DD4F5]">WOW members only</p>
@@ -64,7 +64,7 @@ export function CoupangApp() {
           {RESTAURANTS.map((r) => (
             <li key={r.name}>
               <div className="relative overflow-hidden rounded-2xl">
-                <img src={r.img || '/placeholder.svg'} alt="" className="h-40 w-full object-cover" />
+                <img src={r.img || publicAssetPath('/placeholder.svg')} alt="" className="h-40 w-full object-cover" />
                 <Heart className="absolute top-3 right-3 size-6 text-white drop-shadow" aria-hidden />
                 {r.fee === 'Free delivery' && (
                   <span className="absolute bottom-3 left-3 rounded-md bg-[#00A9E8] px-2 py-0.5 text-[11px] font-bold">FREE DELIVERY</span>

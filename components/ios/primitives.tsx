@@ -2,7 +2,7 @@
 
 import { ChevronLeft, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { hueFromString } from '@/lib/ios-data'
+import { hueFromString, publicAssetPath } from '@/lib/ios-data'
 
 export function Avatar({
   name,
@@ -39,7 +39,7 @@ export function Avatar({
       }}
       aria-hidden={!src}
     >
-      {src ? <img src={src || '/placeholder.svg'} alt={name} className="size-full object-cover" /> : initials}
+      {src ? <img src={src || publicAssetPath('/placeholder.svg')} alt={name} className="size-full object-cover" /> : initials}
     </div>
   )
 }

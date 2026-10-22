@@ -94,26 +94,6 @@ export function SettingsApp() {
             </div>
             <ChevronRight className="size-5 text-white/30" aria-hidden />
           </div>
-          <div className="ml-4 h-px bg-white/10" />
-          <div className="flex items-center justify-between px-4 py-3 text-[17px]">
-            <span>Family</span>
-            <span className="flex items-center -space-x-2">
-              {['Mom 엄마', 'Dad 아빠', 'Minho'].map((n) => (
-                <Avatar key={n} name={n} size={28} className="ring-2 ring-[#1c1c1e]" />
-              ))}
-              <ChevronRight className="ml-3 size-5 text-white/30" aria-hidden />
-            </span>
-          </div>
-        </div>
-
-        <div className="mx-4 mt-5 rounded-[26px] bg-[#1c1c1e] px-4 py-3">
-          <p className="text-[17px]">iCloud storage almost full</p>
-          <p className="mt-0.5 text-[13px] text-white/55">{USER.appleId} · 184.2 GB of 200 GB used</p>
-          <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-white/10">
-            <span className="w-[52%] bg-[#FF9F0A]" />
-            <span className="w-[24%] bg-[#0A84FF]" />
-            <span className="w-[16%] bg-[#30D158]" />
-          </div>
         </div>
 
         {GROUPS.map((group, gi) => (

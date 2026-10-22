@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Bookmark,
   ChevronDown,
@@ -11,16 +11,16 @@ import {
   Home,
   Menu,
   MessageCircle,
+  Music2,
   PlusSquare,
   Search,
   Send,
   SquareUser,
 } from 'lucide-react'
-import { photo, USER } from '@/lib/ios-data'
+import { photo, publicAssetPath, USER } from '@/lib/ios-data'
 import { cn } from '@/lib/utils'
 import { AppScreen, Avatar, ScrollArea } from '../primitives'
 
-type Comment = { id: string; user: string; text: string; time: string; likes: number }
 type Post = {
   id: string
   user: string
@@ -31,10 +31,9 @@ type Post = {
   liked: boolean
   saved: boolean
   time: string
-  comments: Comment[]
+  comments: { user: string; text: string }[]
+  audio?: { title: string; artist: string; previewUrl: string }
 }
-
-const c = (id: string, user: string, text: string, time: string, likes = 0): Comment => ({ id, user, text, time, likes })
 
 const FEED: Post[] = [
   {
@@ -48,9 +47,9 @@ const FEED: Post[] = [
     saved: false,
     time: '2h',
     comments: [
-      c('a', 'haneul_ee', 'the colors 😭😭', '1h', 12),
-      c('b', USER.handle, 'take me with you next time!!', '58m', 4),
-      c('c', 'dohyun.lee', 'shot on iphone?? no way', '40m', 2),
+      { user: 'haneul_ee', text: 'the colors 😭😭' },
+      { user: USER.handle, text: 'take me with you next time!!' },
+      { user: 'dohyun.lee', text: 'shot on iphone?? no way' },
     ],
   },
   {
@@ -63,7 +62,10 @@ const FEED: Post[] = [
     liked: true,
     saved: false,
     time: '5h',
-    comments: [c('a', 'yuna.choi', 'going this weekend!', '4h', 8), c('b', 'sungmin_p', 'best croissant in seoul fr', '3h', 21)],
+    comments: [
+      { user: 'yuna.choi', text: 'going this weekend!' },
+      { user: 'sungmin_p', text: 'best croissant in seoul fr' },
+    ],
   },
   {
     id: 'f3',
@@ -75,7 +77,10 @@ const FEED: Post[] = [
     liked: false,
     saved: true,
     time: '1d',
-    comments: [c('a', USER.handle, 'best day ever', '22h', 3), c('b', 'jisoo.kim', 'we need to do this again', '20h', 5)],
+    comments: [
+      { user: USER.handle, text: 'best day ever' },
+      { user: 'jisoo.kim', text: 'we need to do this again' },
+    ],
   },
   {
     id: 'f4',
@@ -86,7 +91,7 @@ const FEED: Post[] = [
     liked: false,
     saved: false,
     time: '2d',
-    comments: [c('a', 'yuna.choi', 'jealous!!!', '2d', 1)],
+    comments: [{ user: 'yuna.choi', text: 'jealous!!!' }],
   },
 ]
 
@@ -100,7 +105,20 @@ const MY_POSTS: Post[] = [5, 4, 7, 6, 2, 1, 0, 3, 5].map((p, i) => ({
   liked: false,
   saved: false,
   time: `${i + 1}w`,
-  comments: [c('a', 'jisoo.kim', 'obsessed 😍', `${i + 1}w`, 3), c('b', 'haneul_ee', 'wow!!', `${i + 1}w`, 1)],
+  comments: [
+    { user: 'jisoo.kim', text: 'obsessed 😍' },
+    { user: 'haneul_ee', text: 'wow!!' },
+  ],
+  ...(i === 0
+    ? {
+        audio: {
+          title: 'Video Games',
+          artist: 'Lana Del Rey',
+          previewUrl:
+            'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/67/07/50/670750ec-42f9-fcf2-feef-9c4faa873ce8/mzaf_16864780503903222714.plus.aac.p.m4a',
+        },
+      }
+    : {}),
 }))
 
 const STORIES = ['Your story', 'jisoo.kim', 'haneul_ee', 'dohyun.lee', 'yuna.choi', 'sungmin_p', 'cafe.onion']
@@ -109,12 +127,11 @@ export function InstagramApp() {
   const [tab, setTab] = useState<'home' | 'profile'>('home')
   const [posts, setPosts] = useState<Post[]>([...FEED, ...MY_POSTS])
   const [openPost, setOpenPost] = useState<string | null>(null)
+  const [expandedComments, setExpandedComments] = useState<string[]>([])
 
   const update = (id: string, fn: (p: Post) => Post) => setPosts((ps) => ps.map((p) => (p.id === id ? fn(p) : p)))
   const toggleLike = (id: string) => update(id, (p) => ({ ...p, liked: !p.liked, likes: p.likes + (p.liked ? -1 : 1) }))
   const toggleSave = (id: string) => update(id, (p) => ({ ...p, saved: !p.saved }))
-  const addComment = (id: string, text: string) =>
-    update(id, (p) => ({ ...p, comments: [...p.comments, c(String(Date.now()), USER.handle, text, 'now')] }))
 
   const current = posts.find((p) => p.id === openPost)
 
@@ -125,8 +142,13 @@ export function InstagramApp() {
           post={current}
           onBack={() => setOpenPost(null)}
           onLike={() => toggleLike(current.id)}
+          onComment={() =>
+            setExpandedComments((ids) =>
+              ids.includes(current.id) ? ids.filter((id) => id !== current.id) : [...ids, current.id],
+            )
+          }
           onSave={() => toggleSave(current.id)}
-          onComment={(t) => addComment(current.id, t)}
+          commentsExpanded={expandedComments.includes(current.id)}
         />
       ) : tab === 'home' ? (
         <HomeFeed
@@ -134,6 +156,10 @@ export function InstagramApp() {
           onOpen={setOpenPost}
           onLike={toggleLike}
           onSave={toggleSave}
+          expandedComments={expandedComments}
+          onToggleComments={(id) =>
+            setExpandedComments((ids) => (ids.includes(id) ? ids.filter((commentId) => commentId !== id) : [...ids, id]))
+          }
         />
       ) : (
         <Profile posts={posts.filter((p) => p.id.startsWith('m'))} onOpen={setOpenPost} />
@@ -163,11 +189,15 @@ function HomeFeed({
   onOpen,
   onLike,
   onSave,
+  expandedComments,
+  onToggleComments,
 }: {
   posts: Post[]
   onOpen: (id: string) => void
   onLike: (id: string) => void
   onSave: (id: string) => void
+  expandedComments: string[]
+  onToggleComments: (id: string) => void
 }) {
   return (
     <ScrollArea className="pt-[54px]">
@@ -179,8 +209,8 @@ function HomeFeed({
             className="block h-[34px] w-[118px]"
             style={{
               background: '#fff',
-              WebkitMaskImage: 'url(/icons/instagram-wordmark.svg)',
-              maskImage: 'url(/icons/instagram-wordmark.svg)',
+              WebkitMaskImage: `url(${publicAssetPath('/icons/instagram-wordmark.svg')})`,
+              maskImage: `url(${publicAssetPath('/icons/instagram-wordmark.svg')})`,
               WebkitMaskSize: 'contain',
               maskSize: 'contain',
               WebkitMaskRepeat: 'no-repeat',
@@ -192,7 +222,7 @@ function HomeFeed({
         <span className="flex items-center gap-5">
           <Heart className="size-[26px]" aria-hidden />
           <span className="relative">
-            <MessageCircle className="size-[26px] -scale-x-100" aria-hidden />
+            <Send className="size-[26px]" aria-hidden />
             <span className="absolute -top-1.5 -right-2 flex size-[18px] items-center justify-center rounded-full bg-[#FF3040] text-[11px] font-bold">3</span>
           </span>
         </span>
@@ -221,17 +251,40 @@ function HomeFeed({
           <article key={p.id} className="pb-4">
             <PostHeader post={p} />
             <button type="button" onClick={() => onOpen(p.id)} className="block w-full" aria-label={`Open post by ${p.user}`}>
-              <img src={p.image || '/placeholder.svg'} alt={p.caption} className="aspect-square w-full object-cover" />
+              <img src={p.image || publicAssetPath('/placeholder.svg')} alt={p.caption} className="aspect-square w-full object-cover" />
             </button>
-            <PostActions post={p} onLike={() => onLike(p.id)} onComment={() => onOpen(p.id)} onSave={() => onSave(p.id)} />
+            <PostActions
+              post={p}
+              onLike={() => onLike(p.id)}
+              onComment={() => onToggleComments(p.id)}
+              onSave={() => onSave(p.id)}
+            />
             <div className="px-3.5 text-[14px]">
               <p className="font-semibold">{p.likes.toLocaleString()} likes</p>
               <p className="mt-0.5">
                 <span className="font-semibold">{p.user}</span> {p.caption}
               </p>
-              <button type="button" onClick={() => onOpen(p.id)} className="mt-1 text-white/55">
-                View all {p.comments.length} comments
-              </button>
+              {p.comments.length > 0 && (
+                <div className="mt-1">
+                  <button
+                    type="button"
+                    onClick={() => onToggleComments(p.id)}
+                    aria-expanded={expandedComments.includes(p.id)}
+                    className="text-white/55"
+                  >
+                    {expandedComments.includes(p.id) ? 'Hide comments' : `View all ${p.comments.length} comments`}
+                  </button>
+                  {expandedComments.includes(p.id) && (
+                    <ul className="mt-1 flex flex-col gap-0.5 text-white/85">
+                      {p.comments.map((comment, index) => (
+                        <li key={`${comment.user}-${index}`}>
+                          <span className="font-semibold">{comment.user}</span> {comment.text}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
               <p className="mt-0.5 text-[12px] text-white/45">{p.time} ago</p>
             </div>
           </article>
@@ -241,13 +294,24 @@ function HomeFeed({
   )
 }
 
-function PostHeader({ post }: { post: Post }) {
+function PostHeader({ post, showMusicSymbol = false }: { post: Post; showMusicSymbol?: boolean }) {
   return (
     <div className="flex items-center gap-2.5 px-3 py-2.5">
       <Avatar name={post.user} size={34} src={post.user === USER.handle ? photo(4) : undefined} />
       <div className="min-w-0 flex-1 leading-tight">
         <p className="text-[14px] font-semibold">{post.user}</p>
-        {post.location && <p className="text-[12px] text-white/70">{post.location}</p>}
+        {post.audio ? (
+          <p className="flex items-center gap-1 text-[12px] text-white/70">
+            {showMusicSymbol && (
+              <span className="shrink-0 font-semibold" aria-hidden>
+                ♫
+              </span>
+            )}
+            <span className="truncate">{post.audio.title} · {post.audio.artist}</span>
+          </p>
+        ) : (
+          post.location && <p className="text-[12px] text-white/70">{post.location}</p>
+        )}
       </div>
       <span className="text-[18px] tracking-widest text-white/80" aria-hidden>
         ···
@@ -264,7 +328,7 @@ function PostActions({
 }: {
   post: Post
   onLike: () => void
-  onComment: () => void
+  onComment?: () => void
   onSave: () => void
 }) {
   return (
@@ -272,7 +336,7 @@ function PostActions({
       <button type="button" onClick={onLike} aria-label={post.liked ? 'Unlike' : 'Like'} aria-pressed={post.liked}>
         <Heart className={cn('size-[26px] transition active:scale-125', post.liked && 'fill-[#FF3040] text-[#FF3040]')} />
       </button>
-      <button type="button" onClick={onComment} aria-label="Comment">
+      <button type="button" onClick={onComment} aria-label="Comments">
         <MessageCircle className="size-[26px] -scale-x-100" />
       </button>
       <Send className="size-[24px]" aria-hidden />
@@ -287,21 +351,17 @@ function PostDetail({
   post,
   onBack,
   onLike,
-  onSave,
   onComment,
+  onSave,
+  commentsExpanded,
 }: {
   post: Post
   onBack: () => void
   onLike: () => void
+  onComment: () => void
   onSave: () => void
-  onComment: (t: string) => void
+  commentsExpanded: boolean
 }) {
-  const [text, setText] = useState('')
-  const submit = () => {
-    if (!text.trim()) return
-    onComment(text.trim())
-    setText('')
-  }
   return (
     <>
       <header className="flex items-center border-b border-white/10 px-2 pt-[58px] pb-2.5">
@@ -315,75 +375,88 @@ function PostDetail({
         <span className="w-9" />
       </header>
       <ScrollArea>
-        <PostHeader post={post} />
-        <img src={post.image || '/placeholder.svg'} alt={post.caption} className="aspect-square w-full object-cover" />
-        <PostActions post={post} onLike={onLike} onComment={() => {}} onSave={onSave} />
+        <PostHeader post={post} showMusicSymbol />
+        {post.audio && <AudioPreview track={post.audio} />}
+        <img src={post.image || publicAssetPath('/placeholder.svg')} alt={post.caption} className="aspect-square w-full object-cover" />
+        <PostActions post={post} onLike={onLike} onComment={onComment} onSave={onSave} />
         <div className="px-3.5 pb-3 text-[14px]">
           <p className="font-semibold">{post.likes.toLocaleString()} likes</p>
           <p className="mt-0.5">
             <span className="font-semibold">{post.user}</span> {post.caption}
           </p>
           <p className="mt-1 text-[12px] text-white/45">{post.time} ago</p>
+          {commentsExpanded && (
+            <ul className="mt-2 flex flex-col gap-1 text-white/85">
+              {post.comments.map((comment, index) => (
+                <li key={`${comment.user}-${index}`}>
+                  <span className="font-semibold">{comment.user}</span> {comment.text}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-
-        <section aria-label="Comments" className="border-t border-white/10 px-3.5 pt-3 pb-4">
-          <h2 className="mb-3 text-center text-[15px] font-semibold">Comments</h2>
-          <ul className="flex flex-col gap-4">
-            {post.comments.map((cm) => (
-              <CommentRow key={cm.id} comment={cm} />
-            ))}
-          </ul>
-        </section>
       </ScrollArea>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          submit()
-        }}
-        className="flex items-center gap-3 border-t border-white/10 bg-black px-3.5 pt-2.5 pb-8"
-      >
-        <Avatar name={USER.name} size={34} src={photo(4)} />
-        <label className="sr-only" htmlFor="ig-comment">
-          Add a comment
-        </label>
-        <input
-          id="ig-comment"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault()
-          }}
-          placeholder={`Add a comment for ${post.user}...`}
-          className="min-w-0 flex-1 rounded-full border border-white/15 bg-transparent px-4 py-2 text-[14px] outline-none placeholder:text-white/45"
-        />
-        <button type="submit" disabled={!text.trim()} className="text-[15px] font-semibold text-[#0095F6] disabled:opacity-40">
-          Post
-        </button>
-      </form>
     </>
   )
 }
 
-function CommentRow({ comment }: { comment: Comment }) {
-  const [liked, setLiked] = useState(false)
+function AudioPreview({ track }: { track: NonNullable<Post['audio']> }) {
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const playbackStart = useRef<number | null>(null)
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    let cancelled = false
+    const startPreview = async () => {
+      if (cancelled) return
+      const latestStart = Math.max(1, audio.duration - 5)
+      const randomStart = 1 + Math.random() * Math.max(0, latestStart - 1)
+      audio.currentTime = randomStart
+      playbackStart.current = randomStart
+
+      try {
+        await audio.play()
+      } catch (error) {
+        console.warn('Audio preview autoplay was blocked by the browser.', error)
+      }
+    }
+
+    if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      void startPreview()
+    } else {
+      audio.addEventListener('loadedmetadata', startPreview, { once: true })
+    }
+
+    return () => {
+      cancelled = true
+      audio.removeEventListener('loadedmetadata', startPreview)
+      audio.pause()
+      playbackStart.current = null
+    }
+  }, [track.previewUrl])
+
+  const stopPreview = () => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.pause()
+    playbackStart.current = null
+  }
+
   return (
-    <li className="flex gap-3">
-      <Avatar name={comment.user} size={32} src={comment.user === USER.handle ? photo(4) : undefined} />
-      <div className="min-w-0 flex-1 text-[14px]">
-        <p>
-          <span className="mr-1.5 font-semibold">{comment.user}</span>
-          <span className="text-[12px] text-white/45">{comment.time}</span>
-        </p>
-        <p>{comment.text}</p>
-        <p className="mt-1 text-[12px] font-medium text-white/50">
-          {comment.likes + (liked ? 1 : 0) > 0 && `${comment.likes + (liked ? 1 : 0)} likes · `}Reply
-        </p>
-      </div>
-      <button type="button" onClick={() => setLiked((l) => !l)} aria-label="Like comment" aria-pressed={liked}>
-        <Heart className={cn('size-3.5 text-white/60', liked && 'fill-[#FF3040] text-[#FF3040]')} />
-      </button>
-    </li>
+    <audio
+      ref={audioRef}
+      src={track.previewUrl}
+      preload="metadata"
+      onError={() => console.error(`Unable to load audio preview: ${track.previewUrl}`)}
+      onEnded={stopPreview}
+      onTimeUpdate={() => {
+        if (playbackStart.current !== null && audioRef.current && audioRef.current.currentTime - playbackStart.current >= 30) {
+          stopPreview()
+        }
+      }}
+    />
   )
 }
 
@@ -415,9 +488,9 @@ function Profile({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => voi
         </div>
       </div>
       <div className="px-4 pt-3 text-[14px]">
-        <p className="font-semibold">{USER.name}</p>
-        <p className="text-white/85">seoul ✈︎ jeju · film & coffee</p>
-        <p className="text-white/85">🎧 currently looping Golden</p>
+        <a href={`https://twitch.tv/${USER.handle}`} className="font-medium text-[#0095F6]">
+          twitch.tv/{USER.handle}
+        </a>
       </div>
       <div className="flex gap-1.5 px-4 pt-3">
         {['Edit profile', 'Share profile'].map((l) => (
@@ -426,16 +499,6 @@ function Profile({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => voi
           </span>
         ))}
       </div>
-      <ul className="no-scrollbar flex gap-4 overflow-x-auto px-4 py-4">
-        {['Jeju', 'Eats', 'Hikes', 'Mochi', 'Concerts'].map((h, i) => (
-          <li key={h} className="flex shrink-0 flex-col items-center gap-1">
-            <span className="rounded-full border border-white/20 p-[3px]">
-              <img src={photo(i + 4) || '/placeholder.svg'} alt="" className="size-[60px] rounded-full object-cover" />
-            </span>
-            <span className="text-[12px]">{h}</span>
-          </li>
-        ))}
-      </ul>
       <div className="flex border-t border-white/10">
         <span className="flex flex-1 justify-center border-b border-white py-2.5">
           <Grid3x3 className="size-6" aria-label="Posts" />
@@ -451,7 +514,7 @@ function Profile({ posts, onOpen }: { posts: Post[]; onOpen: (id: string) => voi
         {posts.map((p) => (
           <li key={p.id}>
             <button type="button" onClick={() => onOpen(p.id)} className="block w-full" aria-label={`Open post: ${p.caption}`}>
-              <img src={p.image || '/placeholder.svg'} alt="" className="aspect-[3/4] w-full object-cover" />
+              <img src={p.image || publicAssetPath('/placeholder.svg')} alt="" className="aspect-[3/4] w-full object-cover" />
             </button>
           </li>
         ))}

@@ -82,7 +82,11 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
         dragStart.current = null
       }}
     >
-      <img src="/images/wallpaper.png" alt="" className="absolute inset-0 size-full object-cover" />
+      <img
+        src="https://i.imgur.com/CP0ZGMQ.png"
+        alt=""
+        className="absolute inset-0 size-full object-cover"
+      />
       <div
         className={cn(
           'absolute inset-0 transition-all duration-300',
@@ -173,7 +177,6 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
               </button>
             )}
           </div>
-          <p className="absolute bottom-[86px] text-[12px] text-white/40">Hint: 0808</p>
         </div>
       )}
     </div>
