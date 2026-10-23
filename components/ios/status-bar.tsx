@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef } from 'react'
 import { formatTime, useNow } from '@/lib/ios-context'
 import { cn } from '@/lib/utils'
 
@@ -36,12 +37,26 @@ export function StatusBar({ hideTime = false, dark = false }: { hideTime?: boole
 }
 
 export function HomeIndicator({ onClick, dark = false }: { onClick?: () => void; dark?: boolean }) {
+  const pointerStartY = useRef<number | null>(null)
+
   return (
     <button
       type="button"
       onClick={onClick}
+      onPointerDown={(event) => {
+        pointerStartY.current = event.clientY
+      }}
+      onPointerUp={(event) => {
+        if (pointerStartY.current !== null && pointerStartY.current - event.clientY > 24) {
+          onClick?.()
+        }
+        pointerStartY.current = null
+      }}
+      onPointerCancel={() => {
+        pointerStartY.current = null
+      }}
       aria-label="Go to Home Screen"
-      className="absolute inset-x-0 bottom-0 z-[60] flex h-6 items-end justify-center pb-2"
+      className="absolute inset-x-0 bottom-0 z-[60] flex h-6 touch-none items-end justify-center pb-2"
     >
       <span className={cn('h-[5px] w-[139px] rounded-full', dark ? 'bg-black' : 'bg-white')} />
     </button>

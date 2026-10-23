@@ -1,18 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ChevronLeft, Ellipsis, Heart, Info, Search, Share, Trash2 } from 'lucide-react'
-import { photo } from '@/lib/ios-data'
+import { publicAssetPath } from '@/lib/ios-data'
 import { cn } from '@/lib/utils'
 import { AppScreen, GlassButton, ScrollArea } from '../primitives'
 
 type Item = { id: number; src: string; year: number; month: number; day: number }
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const PHOTO_ASSETS = [
+  '/photo apps/0bc7b0d7718aff6bf38d977e039531ed.jpg',
+  '/photo apps/624a0b175417d61bc80aa6058d1ec6cb.jpg',
+  '/photo apps/7143c86eca7e3d30e2b1524302e37098.jpg',
+  '/photo apps/IMG_8428.JPG',
+  '/photo apps/a85c2ceb514c6c938e2cbf150f2251bf.jpg',
+  '/photo apps/c20dc0fdfd7531791ef77ac701059c3a.jpg',
+]
 
 const LIBRARY: Item[] = (() => {
-  const items: Item[] = []
-  let id = 0
   const spans: [number, number, number][] = [
     [2026, 10, 14],
     [2026, 9, 9],
@@ -29,12 +35,16 @@ const LIBRARY: Item[] = (() => {
     [2024, 5, 5],
     [2023, 12, 6],
   ]
-  for (const [year, month, count] of spans) {
-    for (let i = 0; i < count; i++) {
-      items.push({ id: id++, src: photo(id * 3 + month), year, month, day: count - i })
-    }
-  }
-  return items
+  return spans
+    .slice(0, PHOTO_ASSETS.length)
+    .map(([year, month, day], id) => ({
+      id,
+      src: publicAssetPath(PHOTO_ASSETS[id]),
+      year,
+      month,
+      day,
+    }))
+    .sort((a, b) => b.year - a.year || b.month - a.month || b.day - a.day)
 })()
 
 type Mode = 'years' | 'months' | 'all'
@@ -43,10 +53,12 @@ export function PhotosApp() {
   const [mode, setMode] = useState<Mode>('all')
   const [filter, setFilter] = useState<{ year?: number; month?: number }>({})
   const [viewer, setViewer] = useState<Item | null>(null)
-  const [favorites, setFavorites] = useState<Set<number>>(new Set([2, 7]))
+  const [favorites, setFavorites] = useState<Set<number>>(new Set([2]))
+  const swipeStartX = useRef<number | null>(null)
 
   if (viewer) {
     const fav = favorites.has(viewer.id)
+    const viewerIndex = LIBRARY.findIndex((photo) => photo.id === viewer.id)
     return (
       <AppScreen className="animate-in fade-in zoom-in-95 duration-200">
         <header className="flex items-center justify-between px-3 pt-[58px] pb-2">
@@ -59,8 +71,24 @@ export function PhotosApp() {
           </div>
           <GlassButton icon={Ellipsis} label="More" />
         </header>
-        <div className="flex flex-1 items-center">
-          <img src={viewer.src || '/placeholder.svg'} alt="" className="w-full object-contain" />
+        <div
+          className="flex min-h-0 flex-1 touch-pan-y items-center justify-center overflow-hidden"
+          onPointerDown={(event) => {
+            swipeStartX.current = event.clientX
+          }}
+          onPointerUp={(event) => {
+            if (swipeStartX.current === null) return
+            const swipeDistance = event.clientX - swipeStartX.current
+            swipeStartX.current = null
+            if (Math.abs(swipeDistance) < 50) return
+            const nextIndex = viewerIndex + (swipeDistance < 0 ? 1 : -1)
+            if (nextIndex >= 0 && nextIndex < LIBRARY.length) setViewer(LIBRARY[nextIndex])
+          }}
+          onPointerCancel={() => {
+            swipeStartX.current = null
+          }}
+        >
+          <img src={viewer.src || publicAssetPath('/placeholder.svg')} alt="" className="h-auto max-h-full w-auto max-w-full object-contain" />
         </div>
         <div className="flex items-center justify-between px-4 pb-10">
           <GlassButton icon={Share} label="Share" />
@@ -130,7 +158,7 @@ export function PhotosApp() {
             {shown.map((p) => (
               <li key={p.id} className="relative">
                 <button type="button" onClick={() => setViewer(p)} className="block w-full" aria-label={`Photo from ${MONTHS[p.month - 1]} ${p.day}, ${p.year}`}>
-                  <img src={p.src || '/placeholder.svg'} alt="" loading="lazy" className="aspect-square w-full object-cover" />
+                  <img src={p.src || publicAssetPath('/placeholder.svg')} alt="" loading="lazy" className="aspect-square w-full object-cover" />
                 </button>
                 {favorites.has(p.id) && <Heart className="pointer-events-none absolute bottom-1 left-1 size-3.5 fill-white text-white" aria-hidden />}
               </li>
@@ -152,7 +180,7 @@ export function PhotosApp() {
                     }}
                     className="relative block w-full overflow-hidden rounded-[22px] text-left"
                   >
-                    <img src={p.src || '/placeholder.svg'} alt="" className="h-[210px] w-full object-cover" />
+                    <img src={p.src || publicAssetPath('/placeholder.svg')} alt="" className="h-[210px] w-full object-cover" />
                     <span className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-transparent" />
                     <span className="absolute top-3 left-4">
                       <span className="block text-[22px] font-bold">{MONTHS[p.month - 1]}</span>
@@ -185,7 +213,7 @@ export function PhotosApp() {
                     }}
                     className="relative block w-full overflow-hidden rounded-[26px] text-left"
                   >
-                    <img src={cover.src || '/placeholder.svg'} alt="" className="h-[280px] w-full object-cover" />
+                    <img src={cover.src || publicAssetPath('/placeholder.svg')} alt="" className="h-[280px] w-full object-cover" />
                     <span className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/30" />
                     <span className="absolute top-4 left-5">
                       <span className="block text-[34px] font-bold">{y}</span>

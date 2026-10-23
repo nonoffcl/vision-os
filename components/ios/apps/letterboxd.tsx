@@ -17,10 +17,10 @@ const FILMS = [
 ]
 
 const REVIEWS = [
-  { user: 'jisoo.kim', film: 0, rating: 5, liked: true, text: 'cried for 3 business days. in-yun is real and it ruined me 😭' },
-  { user: 'dohyun.lee', film: 6, rating: 4.5, liked: false, text: 'that greenhouse scene… still thinking about it' },
-  { user: 'haneul_ee', film: 4, rating: 4, liked: true, text: 'wanted to quit my job and clean toilets in tokyo afterwards' },
-  { user: 'yuna.choi', film: 1, rating: 5, liked: true, text: 'park chan-wook you will always be famous' },
+  { user: 'yunji.ee', film: 0, rating: 5, liked: true, text: 'cried for 3 business days. in-yun is real and it ruined me 😭' },
+  { user: 'finnchung', film: 6, rating: 4.5, liked: false, text: 'that greenhouse scene… still thinking about it' },
+  { user: 'yosteph', film: 4, rating: 4, liked: true, text: 'wanted to quit my job and clean toilets in tokyo afterwards' },
+  { user: 'imnavely', film: 1, rating: 5, liked: true, text: 'park chan-wook you will always be famous' },
 ]
 
 function Poster({ i, className }: { i: number; className?: string }) {

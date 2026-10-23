@@ -1,80 +1,118 @@
-import { Compass, Heart, Inbox, MessageSquare, Search, User } from 'lucide-react'
+import { useState } from 'react'
+import { Bell, CalendarDays, ChevronLeft, Clapperboard, Home, Info, Play, Plus, Search, UserRound, Video } from 'lucide-react'
 import { photo } from '@/lib/ios-data'
+import { usePhone } from '@/lib/ios-context'
 import { AppScreen, Avatar, ScrollArea } from '../primitives'
 
-const LIVE = [
-  { name: 'Faker', title: 'Ranked grind before Worlds 🏆', game: 'League of Legends', viewers: '84.2K', img: photo(3) },
-  { name: 'Hanryang_', title: 'just chatting + coupang eats mukbang 🍗', game: 'Just Chatting', viewers: '12.4K', img: photo(5) },
-  { name: 'seoulwalks', title: 'IRL rainy night walk in Hongdae ☔', game: 'IRL', viewers: '3.1K', img: photo(0) },
-  { name: 'lofi_cafe_kr', title: 'study with me · 4hr pomodoro', game: 'Music', viewers: '1.8K', img: photo(1) },
-]
-
-const CATEGORIES = [
-  { name: 'Just Chatting', viewers: '402K', img: photo(2) },
-  { name: 'League of Legends', viewers: '211K', img: photo(3) },
-  { name: 'VALORANT', viewers: '128K', img: photo(0) },
-  { name: 'IRL', viewers: '64K', img: photo(7) },
-]
+const PROFILE_TABS = ['Home', 'About', 'Schedule', 'Videos', 'Clips'] as const
+type ProfileTab = (typeof PROFILE_TABS)[number]
 
 export function TwitchApp() {
+  const { goHome } = usePhone()
+  const [activeTab, setActiveTab] = useState<ProfileTab>('Home')
+
   return (
     <AppScreen bg="#0E0E10">
-      <header className="flex items-center justify-between px-4 pt-[58px] pb-3">
-        <Avatar name="Minji Park" src={photo(4)} size={30} />
-        <h1 className="text-[22px] font-bold">Following</h1>
-        <span className="flex gap-4">
-          <Inbox className="size-6" aria-hidden />
-          <MessageSquare className="size-6" aria-hidden />
-        </span>
-      </header>
-      <ScrollArea className="pb-28">
-        <h2 className="px-4 pb-2 text-[17px] font-bold">Live channels</h2>
-        <ul className="flex flex-col gap-4 px-4">
-          {LIVE.map((l) => (
-            <li key={l.name} className="flex gap-3">
-              <div className="relative w-[150px] shrink-0">
-                <img src={l.img || '/placeholder.svg'} alt="" className="aspect-video w-full rounded-md object-cover" />
-                <span className="absolute top-1.5 left-1.5 rounded bg-[#EB0400] px-1 text-[10px] font-bold">LIVE</span>
-                <span className="absolute bottom-1.5 left-1.5 rounded bg-black/70 px-1 text-[10px]">{l.viewers} viewers</span>
-              </div>
-              <div className="min-w-0">
-                <p className="flex items-center gap-1.5 text-[14px] font-semibold">
-                  <Avatar name={l.name} size={18} />
-                  {l.name}
-                </p>
-                <p className="mt-0.5 line-clamp-2 text-[13px] text-white/75">{l.title}</p>
-                <p className="mt-0.5 text-[12px] text-[#BF94FF]">{l.game}</p>
-              </div>
-            </li>
+      <ScrollArea className="pb-[92px]">
+        <section className="relative h-[198px]">
+          <img src={photo(5)} alt="" className="size-full object-cover" />
+          <span className="absolute inset-0 bg-gradient-to-b from-[#F18CA8]/60 via-[#99436F]/30 to-black/20" />
+          <div className="absolute inset-x-4 top-[56px] flex items-center justify-between">
+            <button type="button" onClick={goHome} aria-label="Back to Home" className="flex size-8 items-center justify-center rounded-full bg-black/45"><ChevronLeft className="size-5" /></button>
+            <button type="button" className="rounded-full bg-black/55 px-3 py-1.5 text-[12px] font-semibold">Edit Profile</button>
+          </div>
+          <Avatar name="Katastrophic Kimm" src={photo(4)} size={80} className="absolute bottom-[-34px] left-4 border-2 border-[#0E0E10]" />
+        </section>
+
+        <div className="px-4 pt-10">
+          <h1 className="text-[21px] font-bold leading-tight">katastrophickimm</h1>
+          <p className="mt-0.5 text-[12px] text-white/55">Last live 24h ago</p>
+          <p className="mt-4 text-[13px] leading-[1.45] text-white/80">just watch me play random games and yap.</p>
+          <p className="mt-3 text-[13px] font-semibold">2,094 followers</p>
+          <button type="button" className="mt-3 flex h-8 w-full items-center justify-center rounded-[4px] bg-[#29272E] text-[12px] font-semibold">Stream Manager</button>
+        </div>
+
+        <nav aria-label="Profile sections" className="no-scrollbar mt-3 flex h-10 items-stretch justify-between overflow-x-auto border-b border-white/10 px-3">
+          {PROFILE_TABS.map((tab) => (
+            <button key={tab} type="button" disabled={tab !== 'Home'} onClick={() => setActiveTab(tab)} className={`relative shrink-0 px-2 text-[13px] font-semibold ${activeTab === tab ? 'text-[#BF94FF]' : 'text-white/70'} ${tab !== 'Home' ? 'cursor-default' : ''}`}>
+              {tab}
+              {activeTab === tab && <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-[#BF94FF]" />}
+            </button>
           ))}
-        </ul>
-        <h2 className="px-4 pt-6 pb-2 text-[17px] font-bold">Categories you follow</h2>
-        <ul className="no-scrollbar flex gap-3 overflow-x-auto px-4">
-          {CATEGORIES.map((c) => (
-            <li key={c.name} className="w-[110px] shrink-0">
-              <img src={c.img || '/placeholder.svg'} alt="" className="aspect-[3/4] w-full rounded-md object-cover" />
-              <p className="mt-1 truncate text-[13px] font-semibold">{c.name}</p>
-              <p className="text-[12px] text-white/55">{c.viewers} viewers</p>
-            </li>
-          ))}
-        </ul>
+        </nav>
+
+        {activeTab === 'Home' ? <ProfileHome /> : <ProfileTabContent tab={activeTab} />}
       </ScrollArea>
-      <nav className="absolute inset-x-0 bottom-0 flex justify-around border-t border-white/10 bg-[#18181B] pt-2.5 pb-8 text-[10px]">
-        {[
-          [Heart, 'Following', true],
-          [Compass, 'Discover', false],
-          [Search, 'Browse', false],
-          [User, 'Activity', false],
-        ].map(([I, l, a]) => {
-          const Icon = I as typeof Heart
-          return (
-            <span key={l as string} className={`flex flex-col items-center gap-0.5 ${a ? 'text-[#BF94FF]' : 'text-white/55'}`}>
-              <Icon className={`size-6 ${a ? 'fill-[#BF94FF]' : ''}`} aria-hidden />
-              {l as string}
-            </span>
-          )
-        })}
+
+      <nav aria-label="Twitch navigation" className="absolute inset-x-0 bottom-0 z-10 flex h-[76px] items-start justify-around border-t border-white/10 bg-[#111114] pt-2 text-[10px] text-white/75">
+        <BottomItem icon={Home} label="Home" onClick={goHome} />
+        <BottomItem icon={Search} label="Browse" />
+        <button type="button" aria-label="Create" className="-mt-1 flex size-10 items-center justify-center rounded-full bg-[#29272E]"><Plus className="size-6" /></button>
+        <BottomItem icon={Bell} label="Activity" />
+        <BottomItem icon={UserRound} label="Profile" active />
       </nav>
     </AppScreen>
+  )
+}
+
+function ProfileHome() {
+  return (
+    <section className="px-3 pt-3">
+      <button type="button" className="block w-full text-left">
+        <div className="relative aspect-video overflow-hidden rounded-[3px] bg-[#202024]">
+          <img src={photo(3)} alt="Recent Fortnite stream" className="size-full object-cover" />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/10"><Play className="size-12 fill-white drop-shadow" /></span>
+          <span className="absolute top-2 left-2 rounded-[3px] bg-black/70 px-1.5 py-0.5 text-[10px] font-medium">01:35:37</span>
+          <span className="absolute bottom-2 left-2 rounded-[3px] bg-black/75 px-1.5 py-0.5 text-[10px]">3 views</span>
+        </div>
+        <p className="mt-2 text-[14px] font-semibold">Past Broadcast</p>
+        <h2 className="mt-1 text-[15px] font-bold">Fortnite 🔥 Ranked Grind</h2>
+        <p className="text-[12px] text-white/55">Fortnite · Yesterday</p>
+      </button>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <StreamTile image={photo(1)} duration="01:06" icon={Video} />
+        <StreamTile image={photo(6)} duration="27:00" icon={Clapperboard} />
+      </div>
+    </section>
+  )
+}
+
+function StreamTile({ image, duration, icon: Icon }: { image: string; duration: string; icon: typeof Video }) {
+  return (
+    <button type="button" className="relative aspect-video overflow-hidden rounded-[3px] bg-[#202024] text-left">
+      <img src={image} alt="" className="size-full object-cover" />
+      <span className="absolute top-1.5 left-1.5 rounded-[3px] bg-black/70 px-1.5 py-0.5 text-[10px]">{duration}</span>
+      <Icon className="absolute right-2 bottom-2 size-4 text-white drop-shadow" />
+    </button>
+  )
+}
+
+function BottomItem({
+  icon: Icon,
+  label,
+  active = false,
+  onClick,
+}: {
+  icon: typeof Home
+  label: string
+  active?: boolean
+  onClick?: () => void
+}) {
+  return (
+    <button type="button" onClick={onClick} aria-current={active ? 'page' : undefined} className={`flex min-w-12 flex-col items-center gap-1 ${active ? 'text-[#BF94FF]' : ''}`}>
+      <Icon className="size-[21px]" />
+      <span>{label}</span>
+    </button>
+  )
+}
+
+function ProfileTabContent({ tab }: { tab: Exclude<ProfileTab, 'Home'> }) {
+  const icons = { About: Info, Schedule: CalendarDays, Videos: Video, Clips: Clapperboard }
+  const Icon = icons[tab]
+  return (
+    <div className="flex flex-col items-center px-6 py-12 text-center text-white/60">
+      <Icon className="size-7" />
+      <p className="mt-3 text-[14px]">{tab}</p>
+    </div>
   )
 }

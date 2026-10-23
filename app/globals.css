@@ -15,7 +15,7 @@
   --color-sidebar: var(--sidebar);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
+  --color-char-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
@@ -157,11 +157,16 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
   body {
     @apply bg-background text-foreground;
     font-family:
-      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue',
-      'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Noto Sans KR', sans-serif;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
@@ -185,6 +190,10 @@
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.12),
     0 10px 40px rgb(0 0 0 / 0.5);
+}
+
+@utility font-arial {
+  font-family: Arial, sans-serif;
 }
 
 @utility no-scrollbar {

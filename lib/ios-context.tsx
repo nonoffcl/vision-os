@@ -25,8 +25,12 @@ type PhoneState = {
   lock: () => void
   songIndex: number
   playing: boolean
+  audioError: boolean
+  currentTime: number
+  duration: number
   playSong: (i: number) => void
   togglePlay: () => void
+  seekTo: (time: number) => void
 }
 
 export const PhoneContext = createContext<PhoneState | null>(null)

@@ -19,6 +19,7 @@ import {
   Search,
   Send,
   Settings,
+  ShoppingBag,
   Smile,
   User,
   UserPlus,
@@ -29,9 +30,9 @@ import {
   Ellipsis,
   Smartphone,
 } from 'lucide-react'
-import { photo, USER } from '@/lib/ios-data'
+import { photo, publicAssetPath, USER } from '@/lib/ios-data'
 import { cn } from '@/lib/utils'
-import { AppScreen, Avatar, BackButton, GlassButton, GlassTabBar, ScrollArea, type Tab } from '../primitives'
+import { AppScreen, Avatar, GlassButton, ScrollArea } from '../primitives'
 
 type Friend = { id: string; name: string; status?: string; music?: string; img?: string; bg: string; favorite?: boolean }
 type Msg = { id: string; from: string; text: string; time: string }
@@ -47,21 +48,22 @@ type Chat = {
 }
 
 const FRIENDS: Friend[] = [
-  { id: 'jisoo', name: 'Jisoo 지수', status: '🎂 birthday girl', music: 'Golden', img: photo(0), bg: photo(0), favorite: true },
-  { id: 'haneul', name: 'Haneul', status: 'han river > everything', img: photo(2), bg: photo(2), favorite: true },
-  { id: 'mom', name: 'Mom 엄마', status: '건강이 최고', bg: photo(7), favorite: true },
-  { id: 'dohyun', name: 'Dohyun Lee', status: 'concert recovery mode 🎤', music: 'Supernova', bg: photo(3) },
-  { id: 'yuna', name: 'Yuna Choi', status: '📚 exam season', img: photo(1), bg: photo(1) },
-  { id: 'sungmin', name: 'Sungmin Park', status: 'gym 6am', bg: photo(7) },
-  { id: 'dad', name: 'Dad 아빠', bg: photo(4) },
-  { id: 'eunji', name: 'Eunji', status: 'jeju 🍊', bg: photo(4) },
-  { id: 'taeyang', name: 'Taeyang Kim', status: 'busy', bg: photo(0) },
-  { id: 'seoyeon', name: 'Seoyeon', status: 'coffee addict ☕', music: 'Ditto', img: photo(1), bg: photo(1) },
-  { id: 'minho', name: 'Minho', bg: photo(5) },
-  { id: 'sora', name: 'Sora Han', status: 'film photography 📷', bg: photo(6) },
+  { id: 'jisoo', name: 'kim nayeon', status: '🎂 birthday girl', music: 'Golden', img: photo(0), bg: photo(0), favorite: true },
+  { id: 'haneul', name: 'yunji lee', status: 'han river > everything', img: photo(2), bg: photo(2), favorite: true },
+  { id: 'mom', name: 'mom 엄마', status: '건강이 최고', bg: photo(7), favorite: true },
+  { id: 'dohyun', name: 'finn', status: 'concert recovery mode 🎤', music: 'Supernova', bg: photo(3) },
+  { id: 'steph', name: 'steph', status: '✨', img: photo(1), bg: photo(1) },
+  { id: 'yuna', name: 'yuna choi', status: '📚 exam season', img: photo(1), bg: photo(1) },
+  { id: 'sungmin', name: 'sungmin park', status: 'gym 6am', bg: photo(7) },
+  { id: 'dad', name: 'dad 아빠', bg: photo(4) },
+  { id: 'eunji', name: 'eunji', status: 'jeju 🍊', bg: photo(4) },
+  { id: 'taeyang', name: 'taeyang kim', status: 'busy', bg: photo(0) },
+  { id: 'seoyeon', name: 'seoyeon', status: 'coffee addict ☕', music: 'Ditto', img: photo(1), bg: photo(1) },
+  { id: 'minho', name: 'minho', bg: photo(5) },
+  { id: 'sora', name: 'sora han', status: 'film photography 📷', bg: photo(6) },
 ]
 
-const ME: Friend = { id: 'me', name: USER.name, status: USER.status, music: 'Golden', img: photo(4), bg: photo(4) }
+const ME: Friend = { id: 'me', name: 'minji park', status: USER.status, music: 'Golden', img: photo(4), bg: photo(4) }
 const findFriend = (id: string) => (id === 'me' ? ME : FRIENDS.find((f) => f.id === id)!)
 
 const m = (id: string, from: string, text: string, time: string): Msg => ({ id, from, text, time })
@@ -74,53 +76,11 @@ const INITIAL_CHATS: Chat[] = [
     pinned: true,
     unread: 2,
     messages: [
-      m('1', 'me', 'happy birthday jisoo!! 🎉🎂', '9:02 AM'),
+      m('1', 'me', 'happy birthday Nayeon!! 🎉🎂', '9:02 AM'),
       m('2', 'jisoo', 'THANK YOUUU 🥹💛', '9:15 AM'),
       m('3', 'me', 'dinner + movie tonight right?', '9:16 AM'),
       m('4', 'jisoo', 'yesss 8pm at CGV', '6:40 PM'),
       m('5', 'jisoo', 'are we still on for tonight?? 🍿', '6:41 PM'),
-    ],
-  },
-  {
-    id: 'c-movie',
-    name: '🎬 Movie Club',
-    members: ['jisoo', 'haneul', 'dohyun', 'yuna'],
-    kind: 'group',
-    unread: 5,
-    messages: [
-      m('1', 'dohyun', 'ok what are we watching friday', '5:10 PM'),
-      m('2', 'haneul', 'something scary pls 👻', '5:12 PM'),
-      m('3', 'yuna', 'no 😭 last time i couldnt sleep', '5:12 PM'),
-      m('4', 'jisoo', 'its my bday i pick 😤', '5:20 PM'),
-      m('5', 'jisoo', 'logging it on letterboxd after obviously', '5:21 PM'),
-    ],
-  },
-  {
-    id: 'c-family',
-    name: 'Family 가족 ❤️',
-    members: ['mom', 'dad', 'minho'],
-    kind: 'group',
-    unread: 3,
-    messages: [
-      m('1', 'mom', '밥 먹었니?', '12:30 PM'),
-      m('2', 'me', '응 먹었어!', '12:45 PM'),
-      m('3', 'dad', '이번 주말에 집에 오니?', '3:02 PM'),
-      m('4', 'minho', 'noona bring chicken 🍗', '3:05 PM'),
-      m('5', 'mom', '조심히 다녀 💐', '4:11 PM'),
-    ],
-  },
-  {
-    id: 'c-uni',
-    name: 'Uni friends 22학번',
-    members: ['yuna', 'sungmin', 'eunji', 'taeyang', 'seoyeon', 'sora', 'minho'],
-    kind: 'group',
-    muted: true,
-    unread: 128,
-    messages: [
-      m('1', 'sungmin', 'who has the notes from tuesday', '2:15 PM'),
-      m('2', 'seoyeon', 'me! sending now', '2:16 PM'),
-      m('3', 'eunji', 'lifesaver 🙏', '2:20 PM'),
-      m('4', 'taeyang', 'study cafe tomorrow 10am?', '4:58 PM'),
     ],
   },
   {
@@ -134,11 +94,11 @@ const INITIAL_CHATS: Chat[] = [
     ],
   },
   {
-    id: 'c-me',
-    members: ['me'],
-    kind: 'self',
-    unread: 0,
-    messages: [m('1', 'me', 'buy gift for jisoo 🎁\ncall dentist\nreturn library books', 'Mon')],
+    id: 'c-steph',
+    members: ['steph'],
+    kind: 'direct',
+    unread: 1,
+    messages: [m('1', 'steph', 'hey! are we still on for later? ✨', '10:24 AM')],
   },
   {
     id: 'c-dohyun',
@@ -153,32 +113,15 @@ const INITIAL_CHATS: Chat[] = [
     members: [],
     kind: 'channel',
     unread: 1,
-    messages: [m('1', 'kakaopay', 'You received ₩15,000 from Haneul.', 'Sat')],
-  },
-  {
-    id: 'c-starbucks',
-    name: 'Starbucks Korea',
-    members: [],
-    kind: 'channel',
-    unread: 0,
-    messages: [m('1', 'Starbucks Korea', '🎃 New autumn drinks are here! Get a free size-up this week.', 'Fri')],
+    messages: [m('1', 'kakaopay', 'You received ₩15,000 from yunji lee.', 'Sat')],
   },
 ]
 
 const REPLIES = ['ㅋㅋㅋㅋㅋ', 'omg yes', 'wait really?', 'okok 👍', 'hahaha', 'I’m on my way!', 'love that 💛', 'ㅇㅋ']
 
-type TabId = 'friends' | 'chats' | 'openchat' | 'more'
-const TABS: Tab<TabId>[] = [
-  { id: 'friends', label: 'Friends', icon: User },
-  { id: 'chats', label: 'Chats', icon: MessageCircle },
-  { id: 'openchat', label: 'Open Chat', icon: MessagesSquare },
-  { id: 'more', label: 'More', icon: Ellipsis },
-]
-
 type View = { type: 'tabs' } | { type: 'profile'; id: string } | { type: 'chat'; id: string }
 
 export function KakaoTalkApp() {
-  const [tab, setTab] = useState<TabId>('chats')
   const [view, setView] = useState<View>({ type: 'tabs' })
   const [chats, setChats] = useState<Chat[]>(INITIAL_CHATS)
 
@@ -231,20 +174,9 @@ export function KakaoTalkApp() {
     )
   }
 
-  const totalUnread = chats.reduce((s, c) => s + (c.muted ? 0 : c.unread), 0)
-
   return (
-    <AppScreen bg="#111">
-      {tab === 'friends' && <FriendsTab onProfile={(id) => setView({ type: 'profile', id })} />}
-      {tab === 'chats' && <ChatsTab chats={chats} onOpen={openChat} />}
-      {tab === 'openchat' && <OpenChatTab />}
-      {tab === 'more' && <MoreTab onProfile={() => setView({ type: 'profile', id: 'me' })} />}
-      <GlassTabBar
-        tabs={TABS.map((t) => (t.id === 'chats' && totalUnread ? { ...t, label: `Chats · ${totalUnread}` } : t))}
-        active={tab}
-        onChange={setTab}
-        accent="#FEE500"
-      />
+    <AppScreen bg="#FFFFFF" className="text-[#191A1D]">
+      <ChatsTab chats={chats} onOpen={openChat} />
     </AppScreen>
   )
 }
@@ -266,7 +198,7 @@ function FriendRow({ f, size = 44, onClick }: { f: Friend; size?: number; onClic
   return (
     <li>
       <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-5 py-2 text-left active:bg-white/5">
-        <Avatar name={f.name} size={size} src={f.img} rounded="squircle" />
+        <Avatar name={f.name} size={size} src={f.img} />
         <span className="min-w-0 flex-1">
           <span className={cn('block truncate', size > 50 ? 'text-[17px] font-semibold' : 'text-[15px]')}>{f.name}</span>
           {f.status && <span className="block truncate text-[12px] text-white/50">{f.status}</span>}
@@ -301,7 +233,7 @@ function FriendsTab({ onProfile }: { onProfile: (id: string) => void }) {
           <Cake className="size-5 text-[#FF375F]" aria-hidden />
         </span>
         <span className="flex-1">
-          <span className="block text-[14px] font-semibold">Jisoo&apos;s birthday is today</span>
+          <span className="block text-[14px] font-semibold">kim nayeon&apos;s birthday is today</span>
           <span className="block text-[12px] text-white/50">Send a gift or a message 🎁</span>
         </span>
         <ChevronRight className="size-4 text-white/40" aria-hidden />
@@ -352,77 +284,82 @@ function ChatAvatar({ chat, size = 50 }: { chat: Chat; size?: number }) {
     )
   }
   const f = findFriend(chat.members[0])
-  return <Avatar name={f.name} src={f.img} size={size} rounded="squircle" />
+  return <Avatar name={f.name} src={f.img} size={size} />
 }
 
 const chatTitle = (c: Chat) =>
   c.name ?? (c.kind === 'self' ? `${USER.firstName} (Me)` : c.members.map((id) => findFriend(id).name).join(', '))
 
 function ChatsTab({ chats, onOpen }: { chats: Chat[]; onOpen: (id: string) => void }) {
-  const [filter, setFilter] = useState<'all' | 'unread' | 'group' | 'channel'>('all')
-  const visible = chats
-    .filter((c) => {
-      if (filter === 'unread') return c.unread > 0
-      if (filter === 'group') return c.kind === 'group'
-      if (filter === 'channel') return c.kind === 'channel'
-      return true
-    })
-    .sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned))
+  const visible = [...chats].sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned))
+  const tabs: { icon: typeof User; label: string }[] = [
+    { icon: User, label: 'Friends' },
+    { icon: MessageCircle, label: 'Chats' },
+    { icon: Video, label: 'View' },
+    { icon: ShoppingBag, label: 'Shopping' },
+    { icon: Ellipsis, label: 'More' },
+  ]
 
   return (
-    <ScrollArea className="pb-28">
-      <TabHeader title="Chats" icons={[Search, Plus, Settings]} />
-      <div className="no-scrollbar flex gap-2 overflow-x-auto px-5 pb-3">
-        {(
-          [
-            ['all', 'All'],
-            ['unread', 'Unread'],
-            ['group', 'Groups'],
-            ['channel', 'Channels'],
-          ] as const
-        ).map(([id, l]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setFilter(id)}
-            className={cn(
-              'shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium',
-              filter === id ? 'bg-white text-black' : 'bg-white/10 text-white/80',
-            )}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-      <ul>
-        {visible.map((c) => {
-          const last = c.messages.at(-1)
-          return (
-            <li key={c.id}>
-              <button type="button" onClick={() => onOpen(c.id)} className="flex w-full items-center gap-3 px-5 py-2.5 text-left active:bg-white/5">
-                <ChatAvatar chat={c} />
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="truncate text-[15px] font-semibold">{chatTitle(c)}</span>
-                    {c.kind === 'group' && <span className="text-[14px] text-white/40">{c.members.length + 1}</span>}
-                    {c.muted && <Bell className="size-3 text-white/40 line-through" aria-label="Muted" />}
-                  </span>
-                  <span className="line-clamp-1 text-[13px] text-white/55">{last?.text ?? 'Start a conversation'}</span>
-                </span>
-                <span className="flex flex-col items-end gap-1.5 self-start pt-0.5">
-                  <span className="text-[11px] text-white/40">{last?.time}</span>
-                  {c.unread > 0 && (
-                    <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#FF5A3C] px-1.5 text-[11px] font-semibold">
-                      {c.unread > 99 ? '99+' : c.unread}
+    <div className="absolute inset-0 flex flex-col bg-white text-[#191A1D]">
+      <header className="flex shrink-0 items-center justify-between px-5 pt-[62px] pb-5">
+        <h1 className="text-[28px] font-bold tracking-tight">Chats</h1>
+        <span className="flex items-center gap-5 text-[#191A1D]" aria-hidden>
+          <Search className="size-[25px]" strokeWidth={2.4} />
+          <span className="relative">
+            <MessageCircle className="size-[24px]" strokeWidth={2.4} />
+            <Plus className="absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2" strokeWidth={3} />
+          </span>
+          <Settings className="size-[25px]" strokeWidth={2.8} />
+        </span>
+      </header>
+      <ScrollArea className="min-h-0 flex-1">
+        <ul>
+          {visible.map((c) => {
+            const last = c.messages.at(-1)
+            return (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  onClick={() => onOpen(c.id)}
+                  className="flex w-full items-center gap-3 px-[17px] py-[13px] text-left active:bg-black/[0.04]"
+                >
+                  <ChatAvatar chat={c} size={46} />
+                  <span className="min-w-0 flex-1 py-0.5">
+                    <span className="flex items-center gap-1.5">
+                      <span className="truncate text-[16px] font-semibold text-[#191A1D]">{chatTitle(c)}</span>
+                      {c.kind === 'group' && <span className="text-[14px] text-[#A0A1A5]">{c.members.length + 1}</span>}
+                      {c.muted && <Bell className="size-3 text-[#A0A1A5] line-through" aria-label="Muted" />}
                     </span>
-                  )}
-                </span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
-    </ScrollArea>
+                    <span className="mt-1 block truncate text-[14px] text-[#929398]">{last?.text ?? 'Start a conversation'}</span>
+                  </span>
+                  <span className="flex min-w-12 flex-col items-end gap-1.5 self-start pt-0.5">
+                    <span className="text-[12px] text-[#A0A1A5]">{last?.time}</span>
+                    {c.unread > 0 && (
+                      <span className="flex h-[19px] min-w-[19px] items-center justify-center rounded-full bg-[#F04445] px-1.5 text-[11px] font-medium text-white">
+                        {c.unread > 99 ? '99+' : c.unread}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </ScrollArea>
+      <nav className="grid shrink-0 grid-cols-5 border-t border-[#ECECEF] bg-white px-2 pt-2 pb-8 text-[#A0A1A5]" aria-label="KakaoTalk navigation">
+        {tabs.map(({ icon: Icon, label }, index) => (
+          <span
+            key={label}
+            className={`relative flex flex-col items-center gap-1 text-[11px] ${index === 1 ? 'font-semibold text-[#191A1D]' : ''}`}
+          >
+            <Icon className={`size-[25px] ${index === 1 ? 'fill-[#191A1D]' : ''}`} strokeWidth={index === 1 ? 2.4 : 2} aria-hidden />
+            {label}
+            {index === 1 && <span className="absolute top-0 left-1/2 ml-2 size-3 rounded-full bg-[#F04445]" />}
+          </span>
+        ))}
+      </nav>
+    </div>
   )
 }
 
@@ -451,22 +388,21 @@ function ChatRoom({
   }
 
   return (
-    <AppScreen bg="#1B2836">
-      <header className="absolute inset-x-0 top-0 z-20 flex items-center gap-2 bg-gradient-to-b from-[#1B2836] via-[#1B2836]/90 to-transparent px-3 pt-[56px] pb-4">
-        <BackButton onClick={onBack} />
-        <div className="glass min-w-0 flex-1 rounded-full px-4 py-1.5 text-center">
-          <p className="truncate text-[15px] font-semibold">{chatTitle(chat)}</p>
-          {chat.kind === 'group' && <p className="text-[11px] text-white/55">{chat.members.length + 1} members</p>}
+    <AppScreen bg="#B4C9DA" className="text-black">
+      <header className="absolute inset-x-0 top-0 z-20 flex items-center gap-1 bg-[#B4C9DA] px-3 pt-[56px] pb-3">
+        <button type="button" onClick={onBack} aria-label="Back to chats" className="flex h-10 items-center gap-1 text-black">
+          <ChevronRight className="size-6 rotate-180" />
+          <span className="text-[16px]">12</span>
+        </button>
+        <div className="min-w-0 flex-1 text-center">
+          <p className="truncate text-[17px] font-semibold">{chatTitle(chat)}</p>
         </div>
-        <GlassButton icon={Search} label="Search chat" />
-        <GlassButton icon={Menu} label="Chat menu" />
+        <Search className="mx-2 size-6 text-black" aria-hidden />
+        <Menu className="size-6 text-black" aria-hidden />
       </header>
 
-      <ScrollArea className="px-3 pt-[120px] pb-3">
-        <p className="mx-auto mb-4 w-fit rounded-full bg-black/25 px-3 py-1 text-[11px] text-white/70">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-        </p>
-        <ul className="flex flex-col gap-1.5">
+      <ScrollArea className="bg-[#B4C9DA] px-3 pt-[112px] pb-3">
+        <ul className="flex flex-col gap-2">
           {chat.messages.map((msg, i) => {
             const prev = chat.messages[i - 1]
             const next = chat.messages[i + 1]
@@ -478,36 +414,36 @@ function ChatRoom({
 
             if (mine) {
               return (
-                <li key={msg.id} className={cn('flex items-end justify-end gap-1.5', firstOfRun && 'mt-2')}>
-                  <span className="flex flex-col items-end text-[10px] leading-tight">
-                    {isLastMine && <span className="font-semibold text-[#FEE500]">1</span>}
-                    {lastOfRun && <span className="text-white/45">{msg.time}</span>}
+                <li key={msg.id} className={cn('flex items-end justify-end gap-1.5', firstOfRun && 'mt-1')}>
+                  <span className="flex flex-col items-end text-[11px] leading-tight text-[#60798A]">
+                    {isLastMine && <span className="font-semibold">1</span>}
+                    {lastOfRun && <span>{msg.time}</span>}
                   </span>
-                  <p className="max-w-[72%] rounded-[16px] rounded-tr-[4px] bg-[#FEE500] px-3 py-2 text-[15px] whitespace-pre-line text-black">
+                  <p className="max-w-[78%] rounded-[19px] bg-[#FEE500] px-3.5 py-2.5 text-[16px] leading-[1.35] whitespace-pre-line text-black">
                     {msg.text}
                   </p>
                 </li>
               )
             }
             return (
-              <li key={msg.id} className={cn('flex gap-2', firstOfRun && 'mt-2')}>
-                <span className="w-10 shrink-0">
+              <li key={msg.id} className={cn('flex gap-1.5', firstOfRun && 'mt-1')}>
+                <span className="w-12 shrink-0">
                   {firstOfRun &&
                     (sender ? (
                       <button type="button" onClick={() => onProfile(sender.id)} aria-label={`View ${sender.name}'s profile`}>
-                        <Avatar name={sender.name} src={sender.img} size={40} rounded="squircle" />
+                        <Avatar name={sender.name} src={sender.img} size={48} />
                       </button>
                     ) : (
-                      <ChatAvatar chat={chat} size={40} />
+                      <ChatAvatar chat={chat} size={48} />
                     ))}
                 </span>
                 <span className="flex min-w-0 flex-col">
-                  {firstOfRun && <span className="mb-1 text-[12px] text-white/70">{sender?.name ?? chat.name}</span>}
+                  {firstOfRun && <span className="mb-1 text-[13px] text-[#60798A]">{sender?.name ?? chat.name}</span>}
                   <span className="flex items-end gap-1.5">
-                    <p className="max-w-[230px] rounded-[16px] rounded-tl-[4px] bg-[#3A3F47] px-3 py-2 text-[15px] whitespace-pre-line">
+                    <p className="max-w-[250px] rounded-[19px] bg-white px-3.5 py-2.5 text-[16px] leading-[1.35] whitespace-pre-line text-black">
                       {msg.text}
                     </p>
-                    {lastOfRun && <span className="shrink-0 text-[10px] text-white/45">{msg.time}</span>}
+                    {lastOfRun && <span className="shrink-0 text-[11px] text-[#60798A]">{msg.time}</span>}
                   </span>
                 </span>
               </li>
@@ -522,10 +458,12 @@ function ChatRoom({
           e.preventDefault()
           submit()
         }}
-        className="flex items-center gap-2 px-3 pt-2 pb-9"
+        className="flex items-center gap-2 bg-white px-3 pt-2 pb-9"
       >
-        <GlassButton icon={Plus} label="Attach" />
-        <div className="glass flex min-w-0 flex-1 items-center rounded-full pr-1 pl-4">
+        <button type="button" aria-label="Add attachment" className="flex size-10 items-center justify-center text-[#424242]">
+          <Plus className="size-5" />
+        </button>
+        <div className="flex min-w-0 flex-1 items-center rounded-full bg-[#F2F2F2] pr-1 pl-4">
           <label htmlFor="kakao-input" className="sr-only">
             Message
           </label>
@@ -537,14 +475,14 @@ function ChatRoom({
               if (e.key === 'Enter' && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault()
             }}
             placeholder="Message"
-            className="h-11 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-white/45"
+            className="h-11 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-[#AAAAAA]"
           />
           {text.trim() ? (
             <button type="submit" aria-label="Send" className="flex size-9 items-center justify-center rounded-full bg-[#FEE500] text-black">
               <Send className="size-4" />
             </button>
           ) : (
-            <Smile className="mr-2 size-6 text-white/70" aria-hidden />
+            <Smile className="mr-2 size-6 text-[#424242]" aria-hidden />
           )}
         </div>
       </form>
@@ -567,7 +505,7 @@ function ProfileView({ friend, onClose, onChat }: { friend: Friend; onClose: () 
       ]
   return (
     <AppScreen className="animate-in fade-in slide-in-from-bottom-8 duration-300">
-      <img src={friend.bg || '/placeholder.svg'} alt="" className="absolute inset-0 size-full object-cover" />
+      <img src={friend.bg || publicAssetPath('/placeholder.svg')} alt="" className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/85" />
       <header className="relative flex items-center justify-between px-4 pt-[58px]">
         <GlassButton icon={X} label="Close profile" onClick={onClose} />
@@ -577,7 +515,7 @@ function ProfileView({ friend, onClose, onChat }: { friend: Friend; onClose: () 
         </span>
       </header>
       <div className="relative mt-auto flex flex-col items-center px-6 pb-8">
-        <Avatar name={friend.name} src={friend.img} size={104} rounded="squircle" className="ring-2 ring-white/20" />
+        <Avatar name={friend.name} src={friend.img} size={104} className="ring-2 ring-white/20" />
         <h2 className="mt-3 text-[22px] font-bold">{friend.name}</h2>
         {friend.status && <p className="mt-1 text-[14px] text-white/75">{friend.status}</p>}
         {friend.music && (
@@ -614,7 +552,7 @@ function OpenChatTab() {
     <ScrollArea className="pb-28">
       <TabHeader title="Open Chat" icons={[Search, Plus]} />
       <div className="mx-5 mb-4 overflow-hidden rounded-2xl">
-        <img src={photo(3) || '/placeholder.svg'} alt="" className="h-32 w-full object-cover" />
+        <img src={photo(3) || publicAssetPath('/placeholder.svg')} alt="" className="h-32 w-full object-cover" />
         <div className="bg-white/[0.06] p-3">
           <p className="text-[15px] font-semibold">Trending now</p>
           <p className="text-[12px] text-white/55">Join live conversations about concerts this weekend</p>
@@ -624,7 +562,7 @@ function OpenChatTab() {
       <ul>
         {rooms.map(([name, sub, p]) => (
           <li key={name} className="flex items-center gap-3 px-5 py-2.5">
-            <img src={photo(p) || '/placeholder.svg'} alt="" className="size-[50px] rounded-[38%] object-cover" />
+            <img src={photo(p) || publicAssetPath('/placeholder.svg')} alt="" className="size-[50px] rounded-[38%] object-cover" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[15px] font-semibold">{name}</span>
               <span className="block truncate text-[13px] text-white/55">{sub}</span>
@@ -652,7 +590,7 @@ function MoreTab({ onProfile }: { onProfile: () => void }) {
     <ScrollArea className="pb-28">
       <TabHeader title="More" icons={[Search, Settings]} />
       <button type="button" onClick={onProfile} className="mx-5 flex w-[calc(100%-40px)] items-center gap-3 rounded-2xl bg-white/[0.06] p-3 text-left">
-        <Avatar name={ME.name} src={ME.img} size={48} rounded="squircle" />
+        <Avatar name={ME.name} src={ME.img} size={48} />
         <span className="flex-1">
           <span className="block text-[16px] font-semibold">{ME.name}</span>
           <span className="block text-[12px] text-white/55">{USER.appleId.replace('icloud.com', 'kakao.com')}</span>

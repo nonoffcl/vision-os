@@ -1,91 +1,67 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, Smile, Users } from 'lucide-react'
-import { photo, USER } from '@/lib/ios-data'
-import { cn } from '@/lib/utils'
-import { AppScreen, Avatar, ScrollArea } from '../primitives'
-
-const POSTS = [
-  { user: 'jisoo.kim', where: 'Hongdae, Seoul', late: '', main: photo(1), front: photo(0), caption: 'bday coffee ☕️🎂', comments: 8 },
-  { user: 'haneul_ee', where: 'Mapo-gu', late: '1 hr late', main: photo(2), front: photo(7), caption: 'picnic part 2', comments: 3 },
-  { user: 'dohyun.lee', where: 'Jamsil', late: '', main: photo(3), front: photo(5), caption: '', comments: 12 },
-  { user: 'yuna.choi', where: 'Sinchon', late: '3 hrs late', main: photo(6), front: photo(1), caption: 'studying w/ my cat', comments: 2 },
-]
+import { Check, ChevronDown, MapPin, Send, UserPlus, Users, VolumeX } from 'lucide-react'
+import { publicAssetPath } from '@/lib/ios-data'
+import { usePhone } from '@/lib/ios-context'
+import { AppScreen } from '../primitives'
 
 export function BeRealApp() {
-  const [tab, setTab] = useState<'friends' | 'discovery'>('friends')
-  return (
-    <AppScreen>
-      <header className="flex items-center justify-between px-4 pt-[58px] pb-2">
-        <Users className="size-6" aria-hidden />
-        <span className="text-[24px] font-extrabold tracking-tight">BeReal.</span>
-        <Avatar name={USER.name} src={photo(4)} size={30} />
-      </header>
-      <div className="flex justify-center gap-5 pb-2 text-[15px] font-semibold">
-        {(['friends', 'discovery'] as const).map((t) => (
-          <button key={t} type="button" onClick={() => setTab(t)} className={cn(tab === t ? 'text-white' : 'text-white/40')}>
-            {t === 'friends' ? 'My Friends' : 'Discovery'}
-          </button>
-        ))}
-      </div>
-      <ScrollArea className="pb-10">
-        <div className="flex flex-col items-center pt-2 pb-5">
-          <div className="relative h-[140px] w-[105px] overflow-hidden rounded-xl ring-2 ring-white/10">
-            <img src={photo(5) || '/placeholder.svg'} alt="Your BeReal" className="size-full object-cover" />
-            <img src={photo(4) || '/placeholder.svg'} alt="" className="absolute top-1.5 left-1.5 h-[42px] w-[32px] rounded-md border border-black object-cover" />
-          </div>
-          <p className="mt-2 text-[13px] font-semibold">Add a caption...</p>
-          <p className="text-[12px] text-white/50">View comment · Jeju · 2 min late</p>
-        </div>
-        {(tab === 'friends' ? POSTS : [...POSTS].reverse()).map((p) => (
-          <BeRealPost key={p.user} post={p} />
-        ))}
-      </ScrollArea>
-    </AppScreen>
-  )
-}
+  const { goHome } = usePhone()
+  const [caption, setCaption] = useState('')
+  const [friendsOnly, setFriendsOnly] = useState(true)
+  const [posted, setPosted] = useState(false)
 
-function BeRealPost({ post }: { post: (typeof POSTS)[number] }) {
-  const [swapped, setSwapped] = useState(false)
-  const [reacted, setReacted] = useState(false)
-  const big = swapped ? post.front : post.main
-  const small = swapped ? post.main : post.front
   return (
-    <article className="mb-6">
-      <div className="flex items-center gap-2.5 px-3 pb-2">
-        <Avatar name={post.user} size={36} />
-        <div className="flex-1 leading-tight">
-          <p className="text-[14px] font-semibold">{post.user}</p>
-          <p className="text-[12px] text-white/50">
-            {post.where} · {post.late || 'on time'}
-          </p>
+    <AppScreen bg="#000">
+      <header className="relative flex items-center justify-between px-5 pt-[58px] pb-2">
+        <button type="button" onClick={goHome} aria-label="Close BeReal" className="flex size-10 items-center justify-center rounded-full bg-[#171717]">
+          <ChevronDown className="size-6" />
+        </button>
+        <h1 className="text-[23px] font-extrabold">BeReal.</h1>
+        <span className="size-10" />
+      </header>
+
+      <div className="flex-1 px-6 pt-7">
+        <input
+          id="bereal-caption"
+          value={caption}
+          onChange={(event) => setCaption(event.target.value)}
+          placeholder="Add a caption..."
+          className="mb-3 w-full bg-transparent px-1 text-[15px] outline-none placeholder:text-white/65"
+        />
+        <div className="relative mx-auto aspect-[3/4] w-full overflow-hidden rounded-[18px]">
+          <img
+            src={publicAssetPath('/images/tumblr_d69d96ba2ece2d54257df6e7433d3da6_4a1b637f_2048.jpg')}
+            alt="Your BeReal photo"
+            className="size-full object-cover"
+          />
+          <img
+            src={publicAssetPath('/images/24b71158f5258d48d087a44be78d147b.jpg')}
+            alt="Your front-camera photo"
+            className="absolute top-[3%] left-[3%] h-[40%] w-[36%] rounded-[15px] border-2 border-black object-cover"
+          />
+          <div className="absolute inset-x-2 bottom-2 flex items-center justify-between gap-1.5">
+            <button type="button" aria-label="Tag friends" className="flex size-10 items-center justify-center rounded-full bg-black/60"><UserPlus className="size-[18px]" /></button>
+            <button type="button" onClick={() => setFriendsOnly((value) => !value)} className="flex h-10 items-center gap-2 rounded-full bg-black/60 px-3 text-[12px] font-semibold">
+              <Users className="size-4" />{friendsOnly ? 'My Friends' : 'Discovery'}
+            </button>
+            <button type="button" aria-label="Add location" className="flex h-10 items-center gap-2 rounded-full bg-black/60 px-3 text-[12px] font-medium"><MapPin className="size-4" />On</button>
+            <button type="button" aria-label="Mute audio" className="flex size-10 items-center justify-center rounded-full bg-black/60"><VolumeX className="size-[18px]" /></button>
+          </div>
         </div>
-        <span className="text-white/60" aria-hidden>
-          •••
-        </span>
       </div>
-      <div className="relative mx-1 aspect-[3/4] overflow-hidden rounded-2xl">
-        <img src={big || '/placeholder.svg'} alt={`${post.user}'s BeReal`} className="size-full object-cover" />
+
+      <footer className="flex flex-col items-center gap-4 px-6 pt-4 pb-12">
         <button
           type="button"
-          onClick={() => setSwapped((s) => !s)}
-          aria-label="Swap cameras"
-          className="absolute top-3 left-3 h-[150px] w-[112px] overflow-hidden rounded-xl border-2 border-black"
+          onClick={() => setPosted(true)}
+          className="flex h-14 w-full items-center justify-center gap-2 text-[22px] font-extrabold tracking-wide"
         >
-          <img src={small || '/placeholder.svg'} alt="" className="size-full object-cover" />
+          {posted ? 'SENT' : 'SEND'}
+          {posted ? <Check className="size-5" /> : <Send className="size-5 fill-white" />}
         </button>
-        <div className="absolute right-3 bottom-3 flex flex-col gap-3">
-          <button type="button" onClick={() => setReacted((r) => !r)} aria-label="React" aria-pressed={reacted}>
-            <Smile className={cn('size-8 drop-shadow', reacted && 'fill-[#FFD60A] text-black')} />
-          </button>
-          <MessageCircle className="size-8 drop-shadow" aria-hidden />
-        </div>
-      </div>
-      <div className="px-3 pt-2 text-[14px]">
-        {post.caption && <p>{post.caption}</p>}
-        <p className="text-white/50">View all {post.comments} comments</p>
-      </div>
-    </article>
+      </footer>
+    </AppScreen>
   )
 }

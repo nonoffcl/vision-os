@@ -2,27 +2,27 @@
 
 import { Pause, Play } from 'lucide-react'
 import { usePhone, useNow } from '@/lib/ios-context'
-import { SONGS } from '@/lib/ios-data'
+import { publicAssetPath, SONGS } from '@/lib/ios-data'
 
 export function SpotifyWidget() {
   const { openApp, songIndex, playing, togglePlay } = usePhone()
   const song = SONGS[songIndex]
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <div className="relative size-[158px] overflow-hidden rounded-[24px] shadow-xl ring-1 ring-white/10">
+      <div className="relative size-[min(158px,calc((100vw-48px)/2))] overflow-hidden rounded-[24px] shadow-xl ring-1 ring-white/10">
         <button type="button" onClick={() => openApp('spotify')} className="absolute inset-0" aria-label={`Open Spotify. Now playing ${song.title} by ${song.artist}`}>
-          <img src={song.cover || '/placeholder.svg'} alt="" className="absolute inset-0 size-full scale-125 object-cover blur-xl" />
+          <img src={song.cover || publicAssetPath('/placeholder.svg')} alt="" className="absolute inset-0 size-full scale-125 object-cover blur-xl" />
           <span className="absolute inset-0 bg-black/45" />
           <span className="relative flex h-full flex-col p-3 text-left">
             <span className="flex items-start justify-between">
-              <img src={song.cover || '/placeholder.svg'} alt="" className="size-[62px] rounded-lg object-cover shadow-lg" />
+              <img src={song.cover || publicAssetPath('/placeholder.svg')} alt="" className="size-[62px] rounded-lg object-cover shadow-lg" />
               <span
                 aria-hidden
                 className="size-5"
                 style={{
                   background: '#1ED760',
-                  WebkitMaskImage: 'url(/icons/spotify.svg)',
-                  maskImage: 'url(/icons/spotify.svg)',
+                  WebkitMaskImage: `url(${publicAssetPath('/icons/spotify.svg')})`,
+                  maskImage: `url(${publicAssetPath('/icons/spotify.svg')})`,
                   WebkitMaskSize: 'contain',
                   maskSize: 'contain',
                 }}
@@ -37,7 +37,7 @@ export function SpotifyWidget() {
         <button
           type="button"
           onClick={togglePlay}
-          aria-label={playing ? 'Pause' : 'Play'}
+          aria-label={playing ? `Pause ${song.title}` : `Play ${song.title}`}
           className="absolute right-3 bottom-3 z-10 flex size-8 items-center justify-center rounded-full bg-white text-black"
         >
           {playing ? <Pause className="size-4 fill-black" /> : <Play className="ml-0.5 size-4 fill-black" />}
@@ -54,7 +54,7 @@ export function CalendarWidget() {
   const day = now ? now.getDate() : 21
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <div className="flex size-[158px] flex-col rounded-[24px] bg-[#1c1c1e] p-3.5 shadow-xl ring-1 ring-white/10">
+      <div className="flex size-[min(158px,calc((100vw-48px)/2))] flex-col rounded-[24px] bg-[#1c1c1e] p-3.5 shadow-xl ring-1 ring-white/10">
         <span className="text-[11px] font-bold tracking-wide text-[#FF453A]">{weekday}</span>
         <span className="text-[44px] leading-none font-light text-white">{day}</span>
         <span className="mt-auto flex gap-2">

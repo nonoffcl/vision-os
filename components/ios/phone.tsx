@@ -1,12 +1,13 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { PhoneContext } from '@/lib/ios-context'
-import type { AppId } from '@/lib/ios-data'
+import { SONGS, type AppId } from '@/lib/ios-data'
 import { HomeScreen } from './home-screen'
 import { LockScreen } from './lock-screen'
 import { HomeIndicator, StatusBar } from './status-bar'
 import { BeRealApp } from './apps/bereal'
+import { CameraApp } from './apps/camera'
 import { ClockApp } from './apps/clock'
 import { CoupangApp } from './apps/coupang'
 import { DiscordApp } from './apps/discord'
@@ -32,6 +33,7 @@ const APPS: Record<AppId, () => React.JSX.Element> = {
   youtube: YouTubeApp,
   clock: ClockApp,
   notes: NotesApp,
+  camera: CameraApp,
   photos: PhotosApp,
   settings: SettingsApp,
   phone: PhoneApp,
@@ -44,7 +46,18 @@ export function Phone() {
   const [locked, setLocked] = useState(true)
   const [app, setApp] = useState<AppId | null>(null)
   const [songIndex, setSongIndex] = useState(0)
-  const [playing, setPlaying] = useState(true)
+  const [playing, setPlaying] = useState(false)
+  const [audioError, setAudioError] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.src = SONGS[0].src
+    audio.load()
+  }, [])
 
   const ctx = useMemo(
     () => ({
@@ -56,20 +69,46 @@ export function Phone() {
       },
       songIndex,
       playing,
+      audioError,
+      currentTime,
+      duration,
       playSong: (i: number) => {
+        const audio = audioRef.current
         setSongIndex(i)
-        setPlaying(true)
+        setAudioError(false)
+        setCurrentTime(0)
+        setDuration(0)
+        if (!audio) return
+        audio.pause()
+        audio.src = SONGS[i].src
+        audio.load()
+        void audio.play().catch(() => {
+          setPlaying(false)
+        })
       },
-      togglePlay: () => setPlaying((p) => !p),
+      togglePlay: () => {
+        const audio = audioRef.current
+        if (!audio) return
+        if (audio.paused) {
+          void audio.play().catch(() => {
+            setPlaying(false)
+          })
+        } else {
+          audio.pause()
+        }
+      },
+      seekTo: (time: number) => {
+        if (audioRef.current) audioRef.current.currentTime = time
+      },
     }),
-    [songIndex, playing],
+    [songIndex, playing, audioError, currentTime, duration],
   )
 
   const ActiveApp = app ? APPS[app] : null
 
   return (
     <PhoneContext.Provider value={ctx}>
-      <div className="relative h-dvh w-full overflow-hidden bg-black sm:h-[min(852px,calc(100dvh-32px))] sm:w-[393px] sm:rounded-[55px] sm:shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_40px_120px_rgba(0,0,0,0.8)]">
+      <div className="relative h-full w-full overflow-hidden bg-black">
         <HomeScreen />
         {ActiveApp && (
           <div key={app} className="absolute inset-0 z-20 animate-in fade-in zoom-in-75 duration-300 ease-out">
@@ -77,8 +116,23 @@ export function Phone() {
           </div>
         )}
         {locked && <LockScreen onUnlock={() => setLocked(false)} />}
-        <StatusBar hideTime={locked} />
-        {!locked && <HomeIndicator onClick={() => setApp(null)} />}
+        <StatusBar hideTime={locked} dark={app === 'kakaotalk'} />
+        {!locked && <HomeIndicator onClick={() => setApp(null)} dark={app === 'kakaotalk'} />}
+        <audio
+          ref={audioRef}
+          preload="metadata"
+          onPlaying={() => setAudioError(false)}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => setPlaying(false)}
+          onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+          onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+          onError={() => {
+            setPlaying(false)
+            setAudioError(true)
+          }}
+          className="hidden"
+        />
       </div>
     </PhoneContext.Provider>
   )

@@ -20,7 +20,7 @@ import {
   Volume2,
   Users,
 } from 'lucide-react'
-import { photo } from '@/lib/ios-data'
+import { photo, publicAssetPath } from '@/lib/ios-data'
 import { cn } from '@/lib/utils'
 import { AppScreen, Avatar, GlassTabBar, ScrollArea, type Tab } from '../primitives'
 
@@ -44,11 +44,11 @@ const CONTACTS = ['Dad 아빠', 'Dohyun Lee', 'Eunji', 'Haneul', 'Jisoo 지수',
 
 type TabId = 'favorites' | 'recents' | 'contacts' | 'keypad' | 'voicemail'
 const TABS: Tab<TabId>[] = [
-  { id: 'favorites', label: 'Favorites', icon: Star },
+  { id: 'favorites', label: 'Favorites', icon: Star, disabled: true },
   { id: 'recents', label: 'Recents', icon: Clock },
-  { id: 'contacts', label: 'Contacts', icon: UserRound },
+  { id: 'contacts', label: 'Contacts', icon: UserRound, disabled: true },
   { id: 'keypad', label: 'Keypad', icon: Grip },
-  { id: 'voicemail', label: 'Voicemail', icon: Voicemail },
+  { id: 'voicemail', label: 'Voicemail', icon: Voicemail, disabled: true },
 ]
 
 type Callee = { name: string; img?: string; label?: string }
@@ -273,7 +273,7 @@ function CallScreen({ callee, onEnd }: { callee: Callee; onEnd: () => void }) {
   return (
     <AppScreen className="animate-in fade-in duration-300">
       {callee.img ? (
-        <img src={callee.img || '/placeholder.svg'} alt="" className="absolute inset-0 size-full scale-125 object-cover blur-3xl" />
+        <img src={callee.img || publicAssetPath('/placeholder.svg')} alt="" className="absolute inset-0 size-full scale-125 object-cover blur-3xl" />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-b from-[#3a3a5c] via-[#1d1d2e] to-black" />
       )}

@@ -15,7 +15,7 @@ const GRID: AppId[] = [
   'twitch',
   'youtube',
   'clock',
-  'photos',
+  'camera',
   'notes',
   'settings',
 ]
@@ -26,16 +26,16 @@ export function HomeScreen() {
   const { openApp } = usePhone()
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <img src="/images/wallpaper.png" alt="" className="absolute inset-0 size-full object-cover" />
+      <img src="https://i.pinimg.com/736x/c8/35/41/c835418c90f432b20ddad3dd34db4bc2.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-0 bg-black/15" />
 
-      <div className="relative flex h-full flex-col px-[26px] pt-[70px]">
+      <div className="relative flex h-full min-h-0 flex-col px-4 pt-[70px] pb-3 max-[760px]:pt-[54px] sm:px-[26px]">
         <div className="grid grid-cols-2 justify-items-center gap-x-4">
           <SpotifyWidget />
           <CalendarWidget />
         </div>
 
-        <ul className="mt-5 grid grid-cols-4 justify-items-center gap-y-5">
+        <ul className="mt-5 grid shrink-0 grid-cols-4 justify-items-center gap-y-5 max-[760px]:mt-3 max-[760px]:gap-y-3">
           {GRID.map((id) => (
             <li key={id}>
               <IconButton id={id} onOpen={openApp} />
@@ -43,14 +43,14 @@ export function HomeScreen() {
           ))}
         </ul>
 
-        <div className="mt-auto mb-3 flex justify-center">
+        <div className="mt-auto mb-3 flex shrink-0 justify-center">
           <span className="glass flex items-center gap-1 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-white">
             <Search className="size-3.5" aria-hidden />
             Search
           </span>
         </div>
 
-        <nav aria-label="Dock" className="glass mb-3 flex justify-between rounded-[34px] px-4 py-4">
+        <nav aria-label="Dock" className="glass mb-3 flex shrink-0 justify-between rounded-[34px] px-4 py-4">
           {DOCK.map((id) => (
             <IconButton key={id} id={id} onOpen={openApp} hideLabel />
           ))}
@@ -65,8 +65,9 @@ function IconButton({ id, onOpen, hideLabel }: { id: AppId; onOpen: (id: AppId) 
   return (
     <button
       type="button"
+      disabled={id === 'letterboxd' || id === 'coupang' || id === 'discord'}
       onClick={() => onOpen(id)}
-      className="flex w-[74px] flex-col items-center gap-1.5 transition active:scale-90 active:brightness-75"
+      className="flex w-full max-w-[74px] flex-col items-center gap-1.5 transition active:scale-90 active:brightness-75 disabled:cursor-not-allowed"
       aria-label={badge ? `${APP_LABELS[id]}, ${badge} notifications` : APP_LABELS[id]}
     >
       <span className="relative">
